@@ -9,6 +9,8 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
+
+import java.io.ByteArrayInputStream;
 import java.time.DayOfWeek;
 
 import org.springframework.stereotype.Service;
@@ -108,13 +110,16 @@ public class KalenderService {
     private Calendar getCalendarService() throws Exception {
 
 
-        InputStream in = getClass().getResourceAsStream("/service-account.json");
+        //InputStream in = getClass().getResourceAsStream("/service-account.json");
 
-        if (in == null) {
-            throw new RuntimeException("service-account.json wurde NICHT gefunden!");
+        String credentials = System.getenv("GOOGLE_CREDENTIALS");
+
+        if (credentials == null) {
+            throw new RuntimeException("GOOGLE_CREDENTIALS ist NICHT gesetzt!");
         }
 
-        //InputStream in = getClass().getResourceAsStream("/service-account.json");
+        InputStream in = new ByteArrayInputStream(credentials.getBytes());
+
 
         GoogleCredential credential = GoogleCredential
                 .fromStream(in)
