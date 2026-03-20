@@ -37,5 +37,10 @@ public class KalenderController {
         return kalenderService.terminBuchen(request);
     }
 
+    @GetMapping("/")
+    public String home() {
+        return "Kalender API läuft 🚀";
+    }
+
 
 }
