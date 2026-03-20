@@ -39,7 +39,7 @@ public class KalenderController {
 
     @GetMapping("/")
     public String home() {
-        return "Kalender API läuft 🚀";
+        return "API läuft 🚀 - nutze /kalender/freietermine";
     }
 
 
