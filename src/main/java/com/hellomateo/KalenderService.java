@@ -74,6 +74,13 @@ public class KalenderService {
 
             for(Event event : existingEvents){
 
+                String status = event.getStatus();
+
+                // 👉 tentative Termine blockieren NICHT
+                if ("tentative".equals(status)) {
+                    continue;
+                }
+
                 DateTime eventStartDT = event.getStart().getDateTime();
                 DateTime eventEndDT = event.getEnd().getDateTime();
 
@@ -133,6 +140,7 @@ public class KalenderService {
                 .build();
     }
 
+    /*
     public String terminBuchen(TerminRequest request) throws Exception
     {
 
@@ -160,8 +168,51 @@ public class KalenderService {
         event.setStart(new EventDateTime().setDateTime(startDateTime));
         event.setEnd(new EventDateTime().setDateTime(endDateTime));
 
+        //service.events().insert(CALENDAR_ID, event).execute();
+
+        event.setStatus("tentative");
         service.events().insert(CALENDAR_ID, event).execute();
 
         return "Termin erfolgreich gebucht";
+    }
+
+     */
+
+    public String terminBuchen(TerminRequest request) throws Exception {
+
+        Calendar service = getCalendarService();
+
+        LocalDate date = LocalDate.parse(request.getDatum());
+        LocalTime time = LocalTime.parse(request.getUhrzeit());
+
+        // Prüfen, ob der Slot noch frei ist
+        List<String> freieSlots = getFreieSlots(date);
+        if (!freieSlots.contains(request.getUhrzeit())) {
+            return "Termin nicht mehr verfügbar!";
+        }
+
+        // Start- und Endzeit des Termins
+        ZonedDateTime start = ZonedDateTime.of(date, time, ZONE);
+        ZonedDateTime end = start.plusMinutes(30);
+
+        // Neues Event erstellen
+        Event event = new Event();
+        event.setSummary("ANFRAGE - " + request.getName()); // Titel für Mitarbeiter
+        event.setDescription(
+                "Telefon: " + request.getTelefon() + "\n" +
+                        "Anliegen: " + request.getAnliegen()
+        );
+        event.setStatus("tentative"); // wichtig, damit es wie eine Anfrage angezeigt wird
+
+        // Start- und Endzeit setzen
+        DateTime startDateTime = new DateTime(start.toInstant().toEpochMilli());
+        DateTime endDateTime = new DateTime(end.toInstant().toEpochMilli());
+        event.setStart(new EventDateTime().setDateTime(startDateTime));
+        event.setEnd(new EventDateTime().setDateTime(endDateTime));
+
+        // Event in den Kalender einfügen
+        service.events().insert(CALENDAR_ID, event).execute();
+
+        return "Termin erfolgreich als Anfrage gebucht!";
     }
 }

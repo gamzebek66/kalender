@@ -33,6 +33,9 @@ public class KalenderController {
         System.out.println("Datum: " + request.getDatum());
         System.out.println("Uhrzeit: " + request.getUhrzeit());
         System.out.println("Name: " + request.getName());
+        System.out.println("Telefon: " + request.getTelefon());
+        System.out.println("Anliegen: " + request.getAnliegen());
+
 
         return kalenderService.terminBuchen(request);
     }
