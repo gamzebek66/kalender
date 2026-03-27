@@ -26,7 +26,7 @@ public class KalenderService {
 
     private static final String APPLICATION_NAME = "HelloMateoSync";
 
-    private static final LocalTime START = LocalTime.of(8,30);
+    private static final LocalTime START = LocalTime.of(9,0);
     private static final LocalTime END = LocalTime.of(18,0);
     private static final int SLOT_MIN = 30;
 

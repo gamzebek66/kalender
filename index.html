@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Termin buchen</title>
+
+ <style>
+
+     body {
+         font-family: Arial, sans-serif;
+         background: linear-gradient(135deg, #f0f4ff, #ffffff);
+         text-align: center;
+         margin-top: 60px;
+     }
+
+     h1 {
+         margin-bottom: 10px;
+     }
+
+     p {
+         color: #555;
+     }
+
+     input[type="date"] {
+         padding: 10px;
+         width: 180px;
+         border-radius: 8px;
+         border: 1px solid #ccc;
+         margin-bottom: 15px;
+         font-size: 16px;
+         transition: 0.2s;
+     }
+
+     input[type="date"]:focus {
+         border-color: #4a90e2;
+         outline: none;
+     }
+
+     button {
+         padding: 10px 20px;
+         border: none;
+         border-radius: 8px;
+         background-color: #4a90e2;
+         color: white;
+         font-size: 16px;
+         cursor: pointer;
+         transition: 0.2s;
+     }
+
+     button:hover {
+         background-color: #357abd;
+     }
+
+     ul {
+         list-style: none;
+         padding: 0;
+         margin-top: 20px;
+         max-width: 300px;
+         margin-left: auto;
+         margin-right: auto;
+     }
+
+     li {
+         background: #f5f5f5;
+         margin: 8px 0;
+         padding: 12px;
+         border-radius: 8px;
+         cursor: pointer;
+         transition: 0.2s;
+     }
+
+     li:hover {
+         background: #e0ecff;
+         transform: scale(1.02);
+     }
+
+
+
+ </style>
+
+</head>
+<body>
+
+<h1> Terminbuchung</h1>
+
+<p>Datum auswählen:</p>
+<input type="date" id="datum">
+
+<br><br>
+
+<button onclick="ladeTermine()">Freie Termine anzeigen</button>
+
+<h2>Freie Termine:</h2>
+<ul id="slots"></ul>
+
+<script>
+  const API_URL = "https://kalender-3lt5.onrender.com";
+
+  function ladeTermine() {
+    const datum = document.getElementById("datum").value;
+
+    if (!datum) {
+      alert("Bitte Datum auswählen");
+      return;
+    }
+
+    fetch(`${API_URL}/kalender/freietermine?datum=${datum}`)
+            .then(res => res.json())
+            .then(data => {
+              const list = document.getElementById("slots");
+              list.innerHTML = "";
+
+              if (data.length === 0) {
+                list.innerHTML = "<li>Keine freien Termine</li>";
+                return;
+              }
+
+              data.forEach(slot => {
+                const li = document.createElement("li");
+                li.innerText = slot;
+
+                li.style.cursor = "pointer";
+                li.onclick = () => buchen(datum, slot);
+
+                list.appendChild(li);
+              });
+            })
+            .catch(err => {
+              alert("Fehler beim Laden der Termine");
+              console.error(err);
+            });
+  }
+
+  function buchen(datum, uhrzeit) {
+    const name = prompt("Dein Name:");
+
+    if (!name) {
+      alert("Bitte einen Namen eingeben")
+      return;
+    }
+
+    fetch(`${API_URL}/kalender/buchen`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        datum: datum,
+        uhrzeit: uhrzeit,
+        name: name
+      })
+    })
+            .then(res => res.text())
+            .then(msg => {
+              alert(msg);
+              ladeTermine(); // aktualisiert Liste
+            })
+            .catch(err => {
+              alert("Fehler beim Buchen");
+              console.error(err);
+            });
+  }
+</script>
+
+</body>
+</html>
