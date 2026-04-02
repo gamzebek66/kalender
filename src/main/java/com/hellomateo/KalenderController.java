@@ -32,7 +32,9 @@ public class KalenderController {
         // Zum Prüfen kann später gelösct werden wird auch gelöscht
         System.out.println("Datum: " + request.getDatum());
         System.out.println("Uhrzeit: " + request.getUhrzeit());
-        System.out.println("Name: " + request.getName());
+        //System.out.println("Name: " + request.getName());
+        System.out.println("Name: " + request.getVorname());
+        System.out.println("Nachname: " + request.getNachname());
         System.out.println("Telefon: " + request.getTelefon());
         System.out.println("Anliegen: " + request.getAnliegen());
 
