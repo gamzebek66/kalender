@@ -1,91 +1,107 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Termin buchen</title>
+    <meta charset="UTF-8">
+    <title>Termin buchen</title>
 
- <style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f4ff, #ffffff);
+            text-align: center;
+            margin-top: 60px;
+        }
 
-     body {
-         font-family: Arial, sans-serif;
-         background: linear-gradient(135deg, #f0f4ff, #ffffff);
-         text-align: center;
-         margin-top: 60px;
-     }
+        input, select, textarea {
+            padding: 10px;
+            width: 220px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
 
-     h1 {
-         margin-bottom: 10px;
-     }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4a90e2;
+            color: white;
+            cursor: pointer;
+        }
 
-     p {
-         color: #555;
-     }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
 
-     input[type="date"] {
-         padding: 10px;
-         width: 180px;
-         border-radius: 8px;
-         border: 1px solid #ccc;
-         margin-bottom: 15px;
-         font-size: 16px;
-         transition: 0.2s;
-     }
+        li {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
 
-     input[type="date"]:focus {
-         border-color: #4a90e2;
-         outline: none;
-     }
+        li:hover {
+            background: #e0ecff;
+        }
 
-     button {
-         padding: 10px 20px;
-         border: none;
-         border-radius: 8px;
-         background-color: #4a90e2;
-         color: white;
-         font-size: 16px;
-         cursor: pointer;
-         transition: 0.2s;
-     }
+        /* OVERLAY */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            z-index: 999;
+        }
 
-     button:hover {
-         background-color: #357abd;
-     }
+        #overlay.aktiv {
+            display: block;
+        }
 
-     ul {
-         list-style: none;
-         padding: 0;
-         margin-top: 20px;
-         max-width: 300px;
-         margin-left: auto;
-         margin-right: auto;
-         display: grid;
-         grid-template-columns: repeat(2, 1fr);
-         grid-gap: 10px;
+        /* POPUP FORMULAR */
+        #buchungForm {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 280px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
 
-     }
+        #buchungForm.aktiv {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
 
-     li {
-         background: #f5f5f5;
-         margin: 8px 0;
-         padding: 12px;
-         border-radius: 8px;
-         cursor: pointer;
-         transition: 0.2s;
-     }
-
-     li:hover {
-         background: #e0ecff;
-         transform: scale(1.02);
-     }
-
-
-
- </style>
-
+        #auswahlInfo {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #4a90e2;
+        }
+    </style>
 </head>
 <body>
 
-<h1> Terminbuchung</h1>
+<h1>Terminbuchung</h1>
 
 <p>Datum auswählen:</p>
 <input type="date" id="datum">
@@ -97,74 +113,140 @@
 <h2>Freie Termine:</h2>
 <ul id="slots"></ul>
 
+<!-- Overlay -->
+<div id="overlay"></div>
+
+<!-- Popup Formular -->
+<div id="buchungForm">
+
+    <div id="auswahlInfo"></div>
+
+    <input type="text" id="vorname" placeholder="Vorname"><br>
+    <input type="text" id="nachname" placeholder="Nachname"><br>
+    <input type="tel" id="telefon" placeholder="Telefonnummer"><br>
+
+    <select id="anliegen" onchange="zeigeSonstigesFeld()">
+        <option value="">Bitte auswählen</option>
+        <option value="Einlagen">Einlagen</option>
+        <option value="Kompression">Kompressionstrümpfe</option>
+        <option value="Orthesen">Orthesen</option>
+        <option value="EDS">EDS Beratung</option>
+        <option value="Rezept">Fragen zum Rezept</option>
+        <option value="Prothesen">Prothesen</option>
+        <option value="Sonstiges">Sonstiges</option>
+
+    </select>
+
+    <br>
+
+    <textarea id="sonstigesText" placeholder="Bitte Anliegen beschreiben" style="display:none;"></textarea>
+
+    <br>
+
+    <button onclick="terminAbsenden()">Termin bestätigen</button>
+
+</div>
+
 <script>
-  const API_URL = "https://kalender-3lt5.onrender.com";
+    const API_URL = "https://kalender-3lt5.onrender.com";
 
-  function ladeTermine() {
-    const datum = document.getElementById("datum").value;
+    let gewaehltesDatum = "";
+    let gewaehlteUhrzeit = "";
 
-    if (!datum) {
-      alert("Bitte Datum auswählen");
-      return;
-    }
+    function ladeTermine() {
+        const datum = document.getElementById("datum").value;
 
-    fetch(`${API_URL}/kalender/freietermine?datum=${datum}`)
+        if (!datum) {
+            alert("Bitte Datum auswählen");
+            return;
+        }
+
+        fetch(`${API_URL}/kalender/freietermine?datum=${datum}`)
             .then(res => res.json())
             .then(data => {
-              const list = document.getElementById("slots");
-              list.innerHTML = "";
+                const list = document.getElementById("slots");
+                list.innerHTML = "";
 
-              if (data.length === 0) {
-                list.innerHTML = "<li>Keine freien Termine</li>";
-                return;
-              }
+                if (data.length === 0) {
+                    list.innerHTML = "<li>Keine freien Termine</li>";
+                    return;
+                }
 
-              data.forEach(slot => {
-                const li = document.createElement("li");
-                li.innerText = slot;
-
-                li.style.cursor = "pointer";
-                li.onclick = () => buchen(datum, slot);
-
-                list.appendChild(li);
-              });
-            })
-            .catch(err => {
-              alert("Fehler beim Laden der Termine");
-              console.error(err);
+                data.forEach(slot => {
+                    const li = document.createElement("li");
+                    li.innerText = slot;
+                    li.onclick = () => buchen(datum, slot);
+                    list.appendChild(li);
+                });
             });
-  }
-
-  function buchen(datum, uhrzeit) {
-    const name = prompt("Dein Name:");
-
-    if (!name) {
-      alert("Bitte einen Namen eingeben")
-      return;
     }
 
-    fetch(`${API_URL}/kalender/buchen`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        datum: datum,
-        uhrzeit: uhrzeit,
-        name: name
-      })
-    })
+    function buchen(datum, uhrzeit) {
+        gewaehltesDatum = datum;
+        gewaehlteUhrzeit = uhrzeit;
+
+        document.getElementById("auswahlInfo").innerText =
+            "Termin: " + datum + " um " + uhrzeit;
+
+        document.getElementById("buchungForm").classList.add("aktiv");
+        document.getElementById("overlay").classList.add("aktiv");
+    }
+
+    function zeigeSonstigesFeld() {
+        const auswahl = document.getElementById("anliegen").value;
+        const feld = document.getElementById("sonstigesText");
+
+        feld.style.display = (auswahl === "Sonstiges") ? "block" : "none";
+    }
+
+    function terminAbsenden() {
+        const vorname = document.getElementById("vorname").value;
+        const nachname = document.getElementById("nachname").value;
+        const telefon = document.getElementById("telefon").value;
+        const anliegen = document.getElementById("anliegen").value;
+        const sonstiges = document.getElementById("sonstigesText").value;
+
+        if (!vorname || !nachname || !telefon || !anliegen) {
+            alert("Bitte alle Felder ausfüllen!");
+            return;
+        }
+
+        fetch(`${API_URL}/kalender/buchen`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                datum: gewaehltesDatum,
+                uhrzeit: gewaehlteUhrzeit,
+                vorname,
+                nachname,
+                telefon,
+                anliegen,
+                beschreibung: sonstiges
+            })
+        })
             .then(res => res.text())
             .then(msg => {
-              alert(msg);
-              ladeTermine(); // aktualisiert Liste
-            })
-            .catch(err => {
-              alert("Fehler beim Buchen");
-              console.error(err);
+                alert(msg);
+                ladeTermine();
+
+                document.getElementById("buchungForm").classList.remove("aktiv");
+                document.getElementById("overlay").classList.remove("aktiv");
             });
-  }
+    }
+
+    // Klick auf Hintergrund schließt Popup
+    document.getElementById("overlay").onclick = () => {
+        document.getElementById("buchungForm").classList.remove("aktiv");
+        document.getElementById("overlay").classList.remove("aktiv");
+    };
 </script>
+
+<footer>
+    <p>SaniTheke</p>
+    
+</footer>
 
 </body>
 </html>

@@ -3,14 +3,30 @@ package com.hellomateo;
 public class TerminRequest {
 
     private String datum;
+    private String vorname;
+    private String nachname;
     private String uhrzeit;
-    private String name;
+    //private String name;
     private String telefon;
     private String anliegen;
 
-    // 🔥 WICHTIG
+
     public TerminRequest() {
     }
+
+    public String getVorname(){
+        return vorname;
+    }
+
+    public String getNachname(){
+        return nachname;
+    }
+
+    public void setNachname(String nachname) {
+        this.nachname = nachname;
+    }
+
+
 
 
     public String getDatum() {
@@ -23,11 +39,11 @@ public class TerminRequest {
     public String getAnliegen() {
         return anliegen;
     }
-    public void setTelefon(String datum) {
+    public void setTelefon(String telefon) {
         this.telefon = telefon;
     }
 
-    public void setAn(String datum) {
+    public void setAnliegen(String anliegen) {
         this.anliegen = anliegen;
     }
 
@@ -45,6 +61,11 @@ public class TerminRequest {
         this.uhrzeit = uhrzeit;
     }
 
+    public void setVorname(String vorname)
+    {
+        this.vorname = vorname;
+    }
+/*
     public String getName() {
         return name;
     }
@@ -52,4 +73,6 @@ public class TerminRequest {
     public void setName(String name) {
         this.name = name;
     }
+
+ */
 }

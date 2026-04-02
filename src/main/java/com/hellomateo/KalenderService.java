@@ -197,9 +197,10 @@ public class KalenderService {
 
         // Neues Event erstellen
         Event event = new Event();
-        event.setSummary("ANFRAGE - " + request.getName()); // Titel für Mitarbeiter
+        event.setSummary("ANFRAGE - " + request.getVorname() + " " +request.getNachname()); // Titel für Mitarbeiter
         event.setDescription(
-                "Telefon: " + request.getTelefon() + "\n" +
+                "Name: " + request.getVorname() + " " + request.getNachname() + "\n" +
+                        "Telefon: " + request.getTelefon() + "\n" +
                         "Anliegen: " + request.getAnliegen()
         );
         event.setStatus("tentative"); // wichtig, damit es wie eine Anfrage angezeigt wird
