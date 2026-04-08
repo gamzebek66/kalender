@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <title>Termin buchen</title>
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.css">
 
 </head>
+
+
 <body>
 <div class="wrapper">
     <div class="content">
@@ -43,8 +46,8 @@
         <input type="text" id="vorname" placeholder="Vorname"><br>
         <input type="text" id="nachname" placeholder="Nachname"><br>
         <!--<input type="tel" id="telefon" placeholder="Telefonnummer"><br> -->
-        <label>Telefonnummer (inkl. Ländervorwahl)</label><br>
-        <input type="tel" id="telefon" placeholder="+4917612345678"><br>
+        <label>Telefonnummer</label><br>
+        <input type="tel" id="telefon"><br>
         <button onclick="terminAbsenden()">Termin bestätigen</button>
     </div>
 
@@ -54,6 +57,19 @@
 
     </footer>
 </div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
+
+<script>
+    const input = document.querySelector("#telefon");
+
+    const iti = window.intlTelInput(input, {
+        initialCountry: "de",
+        separateDialCode: true
+    });
+</script>
 
 <script>
     const API_URL = "https://kalender-3lt5.onrender.com";
@@ -117,11 +133,17 @@
     function terminAbsenden(){
         const vorname=document.getElementById("vorname").value;
         const nachname=document.getElementById("nachname").value;
-        const telefon=document.getElementById("telefon").value;
+        /*const telefon=document.getElementById("telefon").value;*/
+        const telefon = iti.getNumber();
         const anliegen=document.getElementById("anliegen").value;
         const sonstiges=document.getElementById("sonstigesText").value;
 
         if(!vorname||!nachname||!telefon||!anliegen){ alert("Bitte alle Felder ausfüllen!"); return; }
+
+        if (!iti.isValidNumber()) {
+            alert("Bitte gültige Telefonnummer eingeben!");
+            return;
+        }
 
         fetch(`${API_URL}/kalender/buchen`,{
             method:"POST",
@@ -137,5 +159,7 @@
         document.getElementById("overlay").classList.remove("aktiv");
     };
 </script>
+
+
 </body>
 </html>
