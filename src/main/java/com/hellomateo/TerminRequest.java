@@ -9,6 +9,7 @@ public class TerminRequest {
     //private String name;
     private String telefon;
     private String anliegen;
+    private String beschreibung;
 
 
     public TerminRequest() {
@@ -65,14 +66,11 @@ public class TerminRequest {
     {
         this.vorname = vorname;
     }
-/*
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getBeschreibung(){
+        return beschreibung;
     }
-
- */
+    public void setBeschreibung(String beschreibung) {
+        this.beschreibung = beschreibung;
+    }
 }

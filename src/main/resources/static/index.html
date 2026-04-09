@@ -87,6 +87,7 @@
         "2027-01-01"
     ];
 
+    /*
     function ladeTermine() {
         const datum = document.getElementById("datum").value;
         const anliegen = document.getElementById("anliegen").value;
@@ -113,7 +114,7 @@
                 if (anliegen === "Einlagen") {
                     gefiltert = data.filter(zeit => {
                         const [h, m] = zeit.split(":").map(Number);
-                        return h >= 9 && h < 17 && (m === 0 || m === 30);
+                        return h >= 9 && h <= 17 && (m === 0 || m === 30);
                     });
                 }
 
@@ -154,6 +155,112 @@
                         const [h, m] = zeit.split(":").map(Number);
                         return h >= 10 && h < 14 && m === 0;
                     });
+                }
+
+                if (gefiltert.length === 0) {
+                    list.innerHTML = "<li>Keine passenden Termine</li>";
+                    return;
+                }
+
+                gefiltert.forEach(slot => {
+                    const li = document.createElement("li");
+                    li.innerText = slot;
+                    li.onclick = () => buchen(datum, slot);
+                    list.appendChild(li);
+                });
+            });
+    }
+
+     */
+
+    function ladeTermine() {
+        const datum = document.getElementById("datum").value;
+        const anliegen = document.getElementById("anliegen").value;
+
+        if (!datum || !anliegen) {
+            alert("Bitte zuerst Anliegen und Datum auswählen");
+            return;
+        }
+
+        if (Feiertage.includes(datum)) {
+            alert("Es tut uns leid, aber an diesem Tag ist die SaniTheke aufgrund von Feiertagen geschlossen");
+            return;
+        }
+
+        fetch(`${API_URL}/kalender/freietermine?datum=${datum}`)
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById("slots");
+                list.innerHTML = "";
+
+                let gefiltert = [];
+                const tag = new Date(datum).getDay(); // 0=So ... 6=Sa
+
+                // ----- SAMSTAG SPEZIAL -----
+                if (tag === 6) {
+                    if (anliegen === "Einlagen" || anliegen === "Orthesen" || anliegen === "Kompression" || anliegen === "Rezept") {
+                        gefiltert = data.filter(zeit => {
+                            const [h, m] = zeit.split(":").map(Number);
+                            return h >= 12 && h < 15 && (m === 0 || m === 30);
+                        });
+                    } else if (anliegen === "EDS") {
+                        list.innerHTML = "<li>EDS Termine sind nur Montag bis Freitag möglich</li>";
+                        return;
+                    } else if (anliegen === "Prothesen") {
+                        list.innerHTML = "<li>Prothesen Termine sind nur Mittwoch und Donnerstag möglich</li>";
+                        return;
+                    } else {
+                        // Sonstiges oder andere Anliegen am Samstag
+                        gefiltert = [];
+                    }
+                } else {
+                    // ----- Wochentage (Mo–Fr) -----
+                    if (anliegen === "Einlagen") {
+                        gefiltert = data.filter(zeit => {
+                            const [h, m] = zeit.split(":").map(Number);
+                            return h >= 9 && h <= 17 && (m === 0 || m === 30);
+                        });
+                    }
+
+                    if (anliegen === "Kompression") {
+                        gefiltert = data.filter(zeit => {
+                            const [h, m] = zeit.split(":").map(Number);
+                            return h >= 9 && h < 14 && m === 0;
+                        });
+                    }
+
+                    if (anliegen === "Orthesen") {
+                        gefiltert = data.filter(zeit => {
+                            const [h, m] = zeit.split(":").map(Number);
+                            return h >= 10 && h < 17 && m === 0;
+                        });
+                    }
+
+                    if (anliegen === "EDS") {
+                        gefiltert = data.filter(zeit => {
+                            const [h, m] = zeit.split(":").map(Number);
+                            return h >= 10 && h < 14 && m === 0;
+                        });
+                    }
+
+                    if (anliegen === "Prothesen") {
+                        if (tag === 3 || tag === 4) { // Mittwoch oder Donnerstag
+                            gefiltert = data.filter(zeit => {
+                                const [h, m] = zeit.split(":").map(Number);
+                                return h >= 14 && h < 18 && m === 0;
+                            });
+                        } else {
+                            list.innerHTML = "<li>Prothesen Termine sind nur Mittwoch und Donnerstag möglich</li>";
+                            return;
+                        }
+                    }
+
+                    if (anliegen === "Sonstiges") {
+                        gefiltert = data.filter(zeit => {
+                            const [h, m] = zeit.split(":").map(Number);
+                            return h >= 10 && h < 14 && m === 0;
+                        });
+                    }
                 }
 
                 if (gefiltert.length === 0) {

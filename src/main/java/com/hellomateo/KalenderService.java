@@ -158,6 +158,7 @@ public class KalenderService {
                 .build();
     }
 
+    /*
     public String terminBuchen(TerminRequest request) throws Exception {
         Calendar service = getCalendarService();
 
@@ -175,20 +176,21 @@ public class KalenderService {
                 .setSingleEvents(true)
                 .execute();
 
-        for(Event e : events.getItems()){
+        for (Event e : events.getItems()) {
             String status = e.getStatus();
-            if("tentative".equals(status) || "confirmed".equals(status)){
+            if ("tentative".equals(status) || "confirmed".equals(status)) {
                 DateTime evStart = e.getStart().getDateTime();
                 DateTime evEnd = e.getEnd().getDateTime();
-                if(evStart != null && evEnd != null){
+                if (evStart != null && evEnd != null) {
                     ZonedDateTime es = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evStart.getValue()), ZONE);
                     ZonedDateTime ee = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evEnd.getValue()), ZONE);
-                    if(start.isBefore(ee) && end.isAfter(es)){
+                    if (start.isBefore(ee) && end.isAfter(es)) {
                         return " Termin ist leider schon vergeben!";
                     }
                 }
             }
         }
+
 
         //  Neues Event erstellen
         Event event = new Event();
@@ -207,5 +209,73 @@ public class KalenderService {
 
         service.events().insert(CALENDAR_ID, event).execute();
         return "Der Termin wurde erfolgreich gebucht!";
+
+         */
+
+
+    public String terminBuchen(TerminRequest request) throws Exception {
+        Calendar service = getCalendarService();
+
+        LocalDate date = LocalDate.parse(request.getDatum());
+        LocalTime time = LocalTime.parse(request.getUhrzeit());
+
+        ZonedDateTime start = ZonedDateTime.of(date, time, ZONE);
+        ZonedDateTime end = start.plusMinutes(30);
+
+        // Doppelbuchungsprüfung
+        Events events = service.events()
+                .list(CALENDAR_ID)
+                .setTimeMin(new DateTime(start.toInstant().toEpochMilli()))
+                .setTimeMax(new DateTime(end.toInstant().toEpochMilli()))
+                .setSingleEvents(true)
+                .execute();
+
+        for (Event e : events.getItems()) {
+            String status = e.getStatus();
+            if ("tentative".equals(status) || "confirmed".equals(status)) {
+                DateTime evStart = e.getStart().getDateTime();
+                DateTime evEnd = e.getEnd().getDateTime();
+                if (evStart != null && evEnd != null) {
+                    ZonedDateTime es = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evStart.getValue()), ZONE);
+                    ZonedDateTime ee = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evEnd.getValue()), ZONE);
+                    if (start.isBefore(ee) && end.isAfter(es)) {
+                        return "Termin ist leider schon vergeben!";
+                    }
+                }
+            }
+        }
+
+        // Neues Event erstellen
+        Event event = new Event();
+
+        String summaryText;
+        String descriptionText;
+
+        if ("Sonstiges".equals(request.getAnliegen()) && request.getBeschreibung() != null && !request.getBeschreibung().isBlank()) {
+            summaryText = "ANFRAGE - " + request.getVorname() + " " + request.getNachname() + " (Sonstiges)";
+            descriptionText = request.getBeschreibung();
+        } else {
+            summaryText = "ANFRAGE - " + request.getVorname() + " " + request.getNachname();
+            descriptionText =
+                    "Name: " + request.getVorname() + " " + request.getNachname() + "\n" +
+                            "Telefon: " + request.getTelefon() + "\n" +
+                            "Anliegen: " + request.getAnliegen();
+        }
+
+        event.setSummary(summaryText);
+        event.setDescription(descriptionText);
+        event.setStatus("tentative");
+
+        DateTime startDateTime = new DateTime(start.toInstant().toEpochMilli());
+        DateTime endDateTime = new DateTime(end.toInstant().toEpochMilli());
+        event.setStart(new EventDateTime().setDateTime(startDateTime));
+        event.setEnd(new EventDateTime().setDateTime(endDateTime));
+
+        // Event in Google Kalender einfügen
+        service.events().insert(CALENDAR_ID, event).execute();
+
+        return "Der Termin wurde erfolgreich gebucht!";
     }
+
+
 }
