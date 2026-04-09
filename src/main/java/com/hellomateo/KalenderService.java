@@ -24,7 +24,7 @@ public class KalenderService {
 
     private static final String APPLICATION_NAME = "HelloMateoSync";
     private static final LocalTime START = LocalTime.of(9,0);
-    private static final LocalTime END = LocalTime.of(17,0);
+    private static final LocalTime END = LocalTime.of(17,30);
     private static final int SLOT_MIN = 30;
 
     private static final String CALENDAR_ID =
@@ -33,9 +33,62 @@ public class KalenderService {
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
 
     public List<String> getFreieSlots(LocalDate datum) throws Exception {
-        if (datum.getDayOfWeek() == DayOfWeek.SATURDAY ||
-                datum.getDayOfWeek() == DayOfWeek.SUNDAY) {
+        if (datum.getDayOfWeek() == DayOfWeek.SUNDAY) {
             return List.of();
+        }
+
+        if (datum.getDayOfWeek() == DayOfWeek.SATURDAY) {
+
+            ZonedDateTime dayStart = ZonedDateTime.of(datum, LocalTime.of(12, 0), ZONE);
+            ZonedDateTime dayEnd = ZonedDateTime.of(datum, LocalTime.of(15, 0), ZONE);
+
+            List<String> freieSlots = new ArrayList<>();
+            Calendar service = getCalendarService();
+
+            DateTime timeMin = new DateTime(dayStart.toInstant().toEpochMilli());
+            DateTime timeMax = new DateTime(dayEnd.toInstant().toEpochMilli());
+
+            Events events = service.events()
+                    .list(CALENDAR_ID)
+                    .setTimeMin(timeMin)
+                    .setTimeMax(timeMax)
+                    .setSingleEvents(true)
+                    .execute();
+
+            List<Event> existingEvents = events.getItems();
+            ZonedDateTime currentSlot = dayStart;
+
+            while(currentSlot.plusMinutes(SLOT_MIN).isBefore(dayEnd.plusSeconds(1))) {
+                ZonedDateTime slotEnd = currentSlot.plusMinutes(SLOT_MIN);
+                boolean isFree = true;
+
+                for(Event event : existingEvents) {
+                    String status = event.getStatus();
+                    if ("tentative".equals(status) || "confirmed".equals(status)) {
+                        DateTime eventStartDT = event.getStart().getDateTime();
+                        DateTime eventEndDT = event.getEnd().getDateTime();
+                        if(eventStartDT == null || eventEndDT == null) continue;
+
+                        ZonedDateTime eventStart = ZonedDateTime.ofInstant(
+                                Instant.ofEpochMilli(eventStartDT.getValue()), ZONE);
+                        ZonedDateTime eventEnd = ZonedDateTime.ofInstant(
+                                Instant.ofEpochMilli(eventEndDT.getValue()), ZONE);
+
+                        if(currentSlot.isBefore(eventEnd) && slotEnd.isAfter(eventStart)) {
+                            isFree = false;
+                            break;
+                        }
+                    }
+                }
+
+                if(isFree) {
+                    freieSlots.add(currentSlot.toLocalTime().toString());
+                }
+                currentSlot = currentSlot.plusMinutes(SLOT_MIN);
+            }
+
+            return freieSlots; // für Samstag direkt zurückgeben
+
         }
 
         List<String> freieSlots = new ArrayList<>();
@@ -114,7 +167,7 @@ public class KalenderService {
         ZonedDateTime start = ZonedDateTime.of(date, time, ZONE);
         ZonedDateTime end = start.plusMinutes(30);
 
-        // 🔹 Doppelbuchungsprüfung direkt vor Insert
+        //  Doppelbuchungsprüfung direkt vor Insert
         Events events = service.events()
                 .list(CALENDAR_ID)
                 .setTimeMin(new DateTime(start.toInstant().toEpochMilli()))
@@ -137,7 +190,7 @@ public class KalenderService {
             }
         }
 
-        // 🔹 Neues Event erstellen
+        //  Neues Event erstellen
         Event event = new Event();
         event.setSummary("ANFRAGE - " + request.getVorname() + " " + request.getNachname());
         event.setDescription(
