@@ -133,12 +133,101 @@
             });
     }
 
+
+/*
+    function ladeTermine() {
+        const datum = document.getElementById("datum").value;
+        const anliegen = document.getElementById("anliegen").value;
+
+        if (!datum || !anliegen) {
+            alert("Bitte zuerst Anliegen und Datum auswählen");
+            return;
+        }
+
+        fetch(`${API_URL}/kalender/freietermine?datum=${datum}`)
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById("slots");
+                list.innerHTML = "";
+
+                const tag = new Date(datum).getDay(); // 0=So ... 3=Mi ... 4=Do
+
+                let gefiltert = data.filter(zeit => {
+                    const [h, m] = zeit.split(":").map(Number);
+
+                    switch (anliegen) {
+
+                        case "Einlagen":
+                            return h >= 9 && h < 17 && (m === 0 || m === 30);
+
+                        case "Kompression":
+                            return h >= 9 && h < 14 && m === 0;
+
+                        case "Orthesen":
+                            return h >= 10 && h < 17 && m === 0;
+
+                        case "EDS":
+                            return h >= 10 && h < 14 && m === 0;
+
+                        case "Prothesen":
+                            if (tag === 3 || tag === 4) {
+                                return h >= 14 && h < 18 && m === 0;
+                            }
+                            return false;
+
+                        default:
+                            return true;
+                    }
+                });
+
+                if (gefiltert.length === 0) {
+                    list.innerHTML = "<li>Keine passenden Termine</li>";
+                    return;
+                }
+
+                gefiltert.forEach(slot => {
+                    const li = document.createElement("li");
+                    li.innerText = slot;
+                    li.onclick = () => buchen(datum, slot);
+                    list.appendChild(li);
+                });
+            });
+    }
+
+
+ */
+
+
     function buchen(datum,uhrzeit){
         gewaehltesDatum=datum;
         gewaehlteUhrzeit=uhrzeit;
 
         document.getElementById("auswahlInfo").innerText =
             "Termin: "+datum+" um "+uhrzeit;
+
+
+        const Feiertage = [
+            "2026-05-01",
+            "2026-05-14",
+            "2026-05-25",
+            "2026-08-03",
+            "2026-12-24",
+            "2026-12-25",
+            "2026-12-26",
+            "2026-12-27",
+            "2026-12-28",
+            "2026-12-29",
+            "2026-12-30",
+            "2026-12-31",
+            "2026-01-01"
+
+        ]
+
+        if (Feiertage.includes(datum))
+        {
+            alert("Es tut uns leid, aber an diesem Tag ist die SaniTheke aufgrund von Feiertagen geschlossen");
+            return;
+        }
 
         document.getElementById("buchungForm").classList.add("aktiv");
         document.getElementById("overlay").classList.add("aktiv");
