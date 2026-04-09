@@ -166,9 +166,46 @@ footer.footer img {
     transform: translate(-50%, -50%) scale(1);
 }
 
+#buchungForm input:focus,
+#buchungForm textarea:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 6px rgba(74,144,226,0.4);
+}
+
+#buchungForm button:hover {
+    background-color: #357ABD;
+    transform: translateY(-1px);
+}
+
 #auswahlInfo {
     font-weight: bold;
     margin-bottom: 15px;
     color: #4a90e2;
     text-align: center;
+}
+
+/* intl-tel-input Anpassungen */
+.iti {
+    width: 90%; /* passt zur Breite deiner Inputs */
+    margin: 0 auto;
+}
+
+.iti__flag-container {
+    padding-left: 10px;
+}
+
+.iti__selected-flag {
+    height: 36px;
+    line-height: 36px;
+}
+
+.iti__country-list {
+    max-height: 200px;  /* scrollbare Liste */
+    overflow-y: auto;
+}
+
+.iti__flag {
+    width: 24px;
+    height: 16px;
 }

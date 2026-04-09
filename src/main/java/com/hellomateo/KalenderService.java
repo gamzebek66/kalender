@@ -131,7 +131,7 @@ public class KalenderService {
                     ZonedDateTime es = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evStart.getValue()), ZONE);
                     ZonedDateTime ee = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evEnd.getValue()), ZONE);
                     if(start.isBefore(ee) && end.isAfter(es)){
-                        return "❌ Termin ist leider schon vergeben!";
+                        return " Termin ist leider schon vergeben!";
                     }
                 }
             }
@@ -153,6 +153,6 @@ public class KalenderService {
         event.setEnd(new EventDateTime().setDateTime(endDateTime));
 
         service.events().insert(CALENDAR_ID, event).execute();
-        return "✅ Termin erfolgreich als Anfrage gebucht!";
+        return "Der Termin wurde erfolgreich gebucht!";
     }
 }
