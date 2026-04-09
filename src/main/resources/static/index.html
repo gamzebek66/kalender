@@ -83,8 +83,27 @@
         }
 
         const Feiertage = [
-            "1.5."
+            "2026-05-01",
+            "2026-05-14",
+            "2026-05-25",
+            "2026-08-03",
+            "2026-12-24",
+            "2026-12-25",
+            "2026-12-26",
+            "2026-12-27",
+            "2026-12-28",
+            "2026-12-29",
+            "2026-12-30",
+            "2026-12-31",
+            "2026-01-01"
+
         ]
+
+        if (Feiertage.includes(datum))
+        {
+            alert("Es tut uns leid, aber an diesem Tag ist die SaniTheke aufgrund von Feiertagen geschlossen");
+            return;
+        }
 
         fetch(`${API_URL}/kalender/freietermine?datum=${datum}`)
             .then(res => res.json())
