@@ -158,61 +158,6 @@ public class KalenderService {
                 .build();
     }
 
-    /*
-    public String terminBuchen(TerminRequest request) throws Exception {
-        Calendar service = getCalendarService();
-
-        LocalDate date = LocalDate.parse(request.getDatum());
-        LocalTime time = LocalTime.parse(request.getUhrzeit());
-
-        ZonedDateTime start = ZonedDateTime.of(date, time, ZONE);
-        ZonedDateTime end = start.plusMinutes(30);
-
-        //  Doppelbuchungsprüfung direkt vor Insert
-        Events events = service.events()
-                .list(CALENDAR_ID)
-                .setTimeMin(new DateTime(start.toInstant().toEpochMilli()))
-                .setTimeMax(new DateTime(end.toInstant().toEpochMilli()))
-                .setSingleEvents(true)
-                .execute();
-
-        for (Event e : events.getItems()) {
-            String status = e.getStatus();
-            if ("tentative".equals(status) || "confirmed".equals(status)) {
-                DateTime evStart = e.getStart().getDateTime();
-                DateTime evEnd = e.getEnd().getDateTime();
-                if (evStart != null && evEnd != null) {
-                    ZonedDateTime es = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evStart.getValue()), ZONE);
-                    ZonedDateTime ee = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evEnd.getValue()), ZONE);
-                    if (start.isBefore(ee) && end.isAfter(es)) {
-                        return " Termin ist leider schon vergeben!";
-                    }
-                }
-            }
-        }
-
-
-        //  Neues Event erstellen
-        Event event = new Event();
-        event.setSummary("ANFRAGE - " + request.getVorname() + " " + request.getNachname());
-        event.setDescription(
-                "Name: " + request.getVorname() + " " + request.getNachname() + "\n" +
-                        "Telefon: " + request.getTelefon() + "\n" +
-                        "Anliegen: " + request.getAnliegen()
-        );
-        event.setStatus("tentative");
-
-        DateTime startDateTime = new DateTime(start.toInstant().toEpochMilli());
-        DateTime endDateTime = new DateTime(end.toInstant().toEpochMilli());
-        event.setStart(new EventDateTime().setDateTime(startDateTime));
-        event.setEnd(new EventDateTime().setDateTime(endDateTime));
-
-        service.events().insert(CALENDAR_ID, event).execute();
-        return "Der Termin wurde erfolgreich gebucht!";
-
-         */
-
-
     public String terminBuchen(TerminRequest request) throws Exception {
         Calendar service = getCalendarService();
 
@@ -276,6 +221,5 @@ public class KalenderService {
 
         return "Der Termin wurde erfolgreich gebucht!";
     }
-
 
 }
