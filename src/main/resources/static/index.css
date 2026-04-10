@@ -261,13 +261,13 @@ footer.footer img {
     }
 
     input, select, textarea {
-        width: 100%;
+        width: 70%;
         font-size: 15px;
         padding: 10px 12px;
     }
 
     button {
-        width: 100%;
+        width: 70%;
         font-size: 15px;
         padding: 12px;
     }
@@ -289,6 +289,10 @@ footer.footer img {
 
     .iti {
         width: 100% !important;
+    }
+
+    footer.footer {
+        width: 70%;
     }
 
 }
