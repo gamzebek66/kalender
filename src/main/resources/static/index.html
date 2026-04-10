@@ -236,7 +236,9 @@
                 nachname,
                 telefon,
                 anliegen,
-                beschreibung:sonstiges
+                beschreibung: "Name " + vorname + " " + nachname + "\n"+
+                    "Telefon: " + telefon +
+                    "\n" + "Anliegen " + sonstiges
             })
         })
             .then(res=>res.text())
