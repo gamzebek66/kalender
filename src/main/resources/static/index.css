@@ -59,6 +59,7 @@ input, select, textarea {
     font-size: 16px;
     box-sizing: border-box;
     transition: all 0.2s ease;
+    margin-bottom: 12px;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -158,12 +159,14 @@ footer.footer img {
     z-index: 1000;
     opacity: 0;
     transition: all 0.3s ease;
+
 }
 
 #buchungForm.aktiv {
     display: block;
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
+
 }
 
 #buchungForm input:focus,
@@ -171,11 +174,15 @@ footer.footer img {
     border-color: #4a90e2;
     outline: none;
     box-shadow: 0 0 6px rgba(74,144,226,0.4);
+
+
+
 }
 
 #buchungForm button:hover {
     background-color: #357ABD;
     transform: translateY(-1px);
+
 }
 
 #auswahlInfo {
@@ -183,6 +190,8 @@ footer.footer img {
     margin-bottom: 15px;
     color: #4a90e2;
     text-align: center;
+    margin-top: 10px;
+
 }
 
 /* intl-tel-input Anpassungen */
@@ -208,4 +217,75 @@ footer.footer img {
 .iti__flag {
     width: 24px;
     height: 16px;
+}
+
+.iti {
+    width: 90% !important;
+    display: block;
+    margin: 0 auto 16px auto;
+
+}
+
+.iti input {
+    width: 100% !important;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+@media (max-width: 600px) {
+
+    body {
+        padding: 10px;
+        align-items: flex-start;
+    }
+
+    .wrapper {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .content {
+        padding: 20px 15px;
+        border-radius: 12px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        font-size: 15px;
+        padding: 10px 12px;
+    }
+
+    button {
+        width: 100%;
+        font-size: 15px;
+        padding: 12px;
+    }
+
+    ul {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    li {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    #buchungForm {
+        width: 92%;
+        padding: 20px;
+    }
+
+    .iti {
+        width: 100% !important;
+    }
+
 }

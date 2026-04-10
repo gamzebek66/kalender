@@ -42,7 +42,7 @@
         <input type="text" id="vorname" placeholder="Vorname"><br>
         <input type="text" id="nachname" placeholder="Nachname"><br>
 
-        <label>Telefonnummer</label><br>
+        <!--<label>Telefonnummer</label><br> -->
         <input type="tel" id="telefon"><br>
 
         <button onclick="terminAbsenden()">Termin bestätigen</button>
@@ -128,7 +128,7 @@
                         gefiltert = [];
                     }
                 } else {
-                    // ----- Wochentage (Mo–Fr) -----
+
                     if (anliegen === "Einlagen") {
                         gefiltert = data.filter(zeit => {
                             const [h, m] = zeit.split(":").map(Number);
@@ -158,7 +158,7 @@
                     }
 
                     if (anliegen === "Prothesen") {
-                        if (tag === 3 || tag === 4) { // Mittwoch oder Donnerstag
+                        if (tag === 3 || tag === 4) {
                             gefiltert = data.filter(zeit => {
                                 const [h, m] = zeit.split(":").map(Number);
                                 return h >= 14 && h < 18 && m === 0;
@@ -225,6 +225,7 @@
         }
 
         const telefon = iti.getNumber();
+        const telefonFormatiert = telefon.replace(/^(\+\d{2})(\d+)/, "$1 $2");
 
         fetch(`${API_URL}/kalender/buchen`,{
             method:"POST",
@@ -234,7 +235,8 @@
                 uhrzeit:gewaehlteUhrzeit,
                 vorname,
                 nachname,
-                telefon,
+                //telefon,
+                telefon: telefonFormatiert, // optional (falls Backend nutzt)
                 anliegen,
                 beschreibung: "Name " + vorname + " " + nachname + "\n"+
                     "Telefon: " + telefon +
