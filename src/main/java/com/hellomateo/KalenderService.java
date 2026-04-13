@@ -10,134 +10,108 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
 
-import java.io.ByteArrayInputStream;
-import java.time.DayOfWeek;
 import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class KalenderService {
 
     private static final String APPLICATION_NAME = "HelloMateoSync";
-    private static final LocalTime START = LocalTime.of(9,0);
-    private static final LocalTime END = LocalTime.of(17,30);
+    private static final LocalTime START = LocalTime.of(9, 0);
+    private static final LocalTime END = LocalTime.of(17, 30);
     private static final int SLOT_MIN = 30;
 
     private static final String CALENDAR_ID =
-          /* "94ea7920226aeaad6ad5a0e36aa7995b713681e3a5af4069fdf1a89774cb8dcf@group.calendar.google.com";*/
-             "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";
-            /*"primary";*/
+            "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
 
     public List<String> getFreieSlots(LocalDate datum) throws Exception {
+
+        System.out.println("👉 getFreieSlots gestartet: " + datum);
+
         if (datum.getDayOfWeek() == DayOfWeek.SUNDAY) {
             return List.of();
         }
 
+        Calendar service = getCalendarService();
+
+        ZonedDateTime dayStart;
+        ZonedDateTime dayEnd;
+
+        // Samstag
         if (datum.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            dayStart = ZonedDateTime.of(datum, LocalTime.of(12, 0), ZONE);
+            dayEnd = ZonedDateTime.of(datum, LocalTime.of(15, 0), ZONE);
+        }
+        // Werktag
+        else {
+            dayStart = ZonedDateTime.of(datum, START, ZONE);
+            dayEnd = ZonedDateTime.of(datum, END, ZONE);
+        }
 
-            ZonedDateTime dayStart = ZonedDateTime.of(datum, LocalTime.of(12, 0), ZONE);
-            ZonedDateTime dayEnd = ZonedDateTime.of(datum, LocalTime.of(15, 0), ZONE);
+        DateTime timeMin = new DateTime(dayStart.toInstant().toEpochMilli());
+        DateTime timeMax = new DateTime(dayEnd.toInstant().toEpochMilli());
 
-            List<String> freieSlots = new ArrayList<>();
-            Calendar service = getCalendarService();
+        Events events;
 
-            DateTime timeMin = new DateTime(dayStart.toInstant().toEpochMilli());
-            DateTime timeMax = new DateTime(dayEnd.toInstant().toEpochMilli());
-
-            Events events = service.events()
+        try {
+            events = service.events()
                     .list(CALENDAR_ID)
                     .setTimeMin(timeMin)
                     .setTimeMax(timeMax)
                     .setSingleEvents(true)
                     .execute();
-
-            List<Event> existingEvents = events.getItems();
-            ZonedDateTime currentSlot = dayStart;
-
-            while(currentSlot.plusMinutes(SLOT_MIN).isBefore(dayEnd.plusSeconds(1))) {
-                ZonedDateTime slotEnd = currentSlot.plusMinutes(SLOT_MIN);
-                boolean isFree = true;
-
-                for(Event event : existingEvents) {
-                    String status = event.getStatus();
-                    if ("tentative".equals(status) || "confirmed".equals(status)) {
-                        DateTime eventStartDT = event.getStart().getDateTime();
-                        DateTime eventEndDT = event.getEnd().getDateTime();
-                        if(eventStartDT == null || eventEndDT == null) continue;
-
-                        ZonedDateTime eventStart = ZonedDateTime.ofInstant(
-                                Instant.ofEpochMilli(eventStartDT.getValue()), ZONE);
-                        ZonedDateTime eventEnd = ZonedDateTime.ofInstant(
-                                Instant.ofEpochMilli(eventEndDT.getValue()), ZONE);
-
-                        if(currentSlot.isBefore(eventEnd) && slotEnd.isAfter(eventStart)) {
-                            isFree = false;
-                            break;
-                        }
-                    }
-                }
-
-                if(isFree) {
-                    freieSlots.add(currentSlot.toLocalTime().toString());
-                }
-                currentSlot = currentSlot.plusMinutes(SLOT_MIN);
-            }
-
-            return freieSlots; // für Samstag direkt zurückgeben
-
+        } catch (Exception e) {
+            System.out.println("❌ Google Calendar Fehler:");
+            e.printStackTrace();
+            throw e;
         }
 
-        List<String> freieSlots = new ArrayList<>();
-        Calendar service = getCalendarService();
-
-        ZonedDateTime dayStart = ZonedDateTime.of(datum, START, ZONE);
-        ZonedDateTime dayEnd = ZonedDateTime.of(datum, END, ZONE);
-
-        DateTime timeMin = new DateTime(dayStart.toInstant().toEpochMilli());
-        DateTime timeMax = new DateTime(dayEnd.toInstant().toEpochMilli());
-
-        Events events = service.events()
-                .list(CALENDAR_ID)
-                .setTimeMin(timeMin)
-                .setTimeMax(timeMax)
-                .setSingleEvents(true)
-                .execute();
-
         List<Event> existingEvents = events.getItems();
+        List<String> freieSlots = new ArrayList<>();
+
         ZonedDateTime currentSlot = dayStart;
 
-        while(currentSlot.plusMinutes(SLOT_MIN).isBefore(dayEnd.plusSeconds(1))) {
+        while (currentSlot.plusMinutes(SLOT_MIN).isBefore(dayEnd.plusSeconds(1))) {
+
             ZonedDateTime slotEnd = currentSlot.plusMinutes(SLOT_MIN);
             boolean isFree = true;
 
-            for(Event event : existingEvents) {
-                String status = event.getStatus();
-                if ("tentative".equals(status) || "confirmed".equals(status)) {
-                    DateTime eventStartDT = event.getStart().getDateTime();
-                    DateTime eventEndDT = event.getEnd().getDateTime();
-                    if(eventStartDT == null || eventEndDT == null) continue;
+            for (Event event : existingEvents) {
 
-                    ZonedDateTime eventStart = ZonedDateTime.ofInstant(
-                            Instant.ofEpochMilli(eventStartDT.getValue()), ZONE);
-                    ZonedDateTime eventEnd = ZonedDateTime.ofInstant(
-                            Instant.ofEpochMilli(eventEndDT.getValue()), ZONE);
+                if (!"confirmed".equals(event.getStatus()) &&
+                        !"tentative".equals(event.getStatus())) {
+                    continue;
+                }
 
-                    if(currentSlot.isBefore(eventEnd) && slotEnd.isAfter(eventStart)) {
-                        isFree = false;
-                        break;
-                    }
+                if (event.getStart() == null || event.getEnd() == null) continue;
+
+                DateTime startDT = event.getStart().getDateTime();
+                DateTime endDT = event.getEnd().getDateTime();
+
+                if (startDT == null || endDT == null) continue;
+
+                ZonedDateTime eventStart = ZonedDateTime.ofInstant(
+                        Instant.ofEpochMilli(startDT.getValue()), ZONE);
+
+                ZonedDateTime eventEnd = ZonedDateTime.ofInstant(
+                        Instant.ofEpochMilli(endDT.getValue()), ZONE);
+
+                if (currentSlot.isBefore(eventEnd) && slotEnd.isAfter(eventStart)) {
+                    isFree = false;
+                    break;
                 }
             }
 
-            if(isFree) {
+            if (isFree) {
                 freieSlots.add(currentSlot.toLocalTime().toString());
             }
+
             currentSlot = currentSlot.plusMinutes(SLOT_MIN);
         }
 
@@ -145,10 +119,15 @@ public class KalenderService {
     }
 
     private Calendar getCalendarService() throws Exception {
+
         String credentials = System.getenv("GOOGLE_CREDENTIALS");
-        if (credentials == null) throw new RuntimeException("GOOGLE_CREDENTIALS ist NICHT gesetzt!");
+
+        if (credentials == null) {
+            throw new RuntimeException("GOOGLE_CREDENTIALS ist NICHT gesetzt!");
+        }
 
         InputStream in = new ByteArrayInputStream(credentials.getBytes());
+
         GoogleCredential credential = GoogleCredential.fromStream(in)
                 .createScoped(Collections.singleton(CalendarScopes.CALENDAR));
 
@@ -161,6 +140,7 @@ public class KalenderService {
     }
 
     public String terminBuchen(TerminRequest request) throws Exception {
+
         Calendar service = getCalendarService();
 
         LocalDate date = LocalDate.parse(request.getDatum());
@@ -169,7 +149,6 @@ public class KalenderService {
         ZonedDateTime start = ZonedDateTime.of(date, time, ZONE);
         ZonedDateTime end = start.plusMinutes(30);
 
-        // Doppelbuchungsprüfung
         Events events = service.events()
                 .list(CALENDAR_ID)
                 .setTimeMin(new DateTime(start.toInstant().toEpochMilli()))
@@ -178,31 +157,46 @@ public class KalenderService {
                 .execute();
 
         for (Event e : events.getItems()) {
-            String status = e.getStatus();
-            if ("tentative".equals(status) || "confirmed".equals(status)) {
-                DateTime evStart = e.getStart().getDateTime();
-                DateTime evEnd = e.getEnd().getDateTime();
-                if (evStart != null && evEnd != null) {
-                    ZonedDateTime es = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evStart.getValue()), ZONE);
-                    ZonedDateTime ee = ZonedDateTime.ofInstant(Instant.ofEpochMilli(evEnd.getValue()), ZONE);
-                    if (start.isBefore(ee) && end.isAfter(es)) {
-                        return "Termin ist leider schon vergeben!";
-                    }
-                }
+
+            if (!"confirmed".equals(e.getStatus()) &&
+                    !"tentative".equals(e.getStatus())) {
+                continue;
+            }
+
+            if (e.getStart() == null || e.getEnd() == null) continue;
+
+            DateTime evStart = e.getStart().getDateTime();
+            DateTime evEnd = e.getEnd().getDateTime();
+
+            if (evStart == null || evEnd == null) continue;
+
+            ZonedDateTime es = ZonedDateTime.ofInstant(
+                    Instant.ofEpochMilli(evStart.getValue()), ZONE);
+
+            ZonedDateTime ee = ZonedDateTime.ofInstant(
+                    Instant.ofEpochMilli(evEnd.getValue()), ZONE);
+
+            if (start.isBefore(ee) && end.isAfter(es)) {
+                return "Termin ist leider schon vergeben!";
             }
         }
 
-        // Neues Event erstellen
         Event event = new Event();
 
         String summaryText;
         String descriptionText;
 
-        if ("Sonstiges".equals(request.getAnliegen()) && request.getBeschreibung() != null && !request.getBeschreibung().isBlank()) {
+        if ("Sonstiges".equals(request.getAnliegen())
+                && request.getBeschreibung() != null
+                && !request.getBeschreibung().isBlank()) {
+
             summaryText = "ANFRAGE - " + request.getVorname() + " " + request.getNachname() + " (Sonstiges)";
             descriptionText = request.getBeschreibung();
+
         } else {
+
             summaryText = "ANFRAGE - " + request.getVorname() + " " + request.getNachname();
+
             descriptionText =
                     "Name: " + request.getVorname() + " " + request.getNachname() + "\n" +
                             "Telefon: " + request.getTelefon() + "\n" +
@@ -213,15 +207,14 @@ public class KalenderService {
         event.setDescription(descriptionText);
         event.setStatus("tentative");
 
-        DateTime startDateTime = new DateTime(start.toInstant().toEpochMilli());
-        DateTime endDateTime = new DateTime(end.toInstant().toEpochMilli());
-        event.setStart(new EventDateTime().setDateTime(startDateTime));
-        event.setEnd(new EventDateTime().setDateTime(endDateTime));
+        event.setStart(new EventDateTime()
+                .setDateTime(new DateTime(start.toInstant().toEpochMilli())));
 
-        // Event in Google Kalender einfügen
+        event.setEnd(new EventDateTime()
+                .setDateTime(new DateTime(end.toInstant().toEpochMilli())));
+
         service.events().insert(CALENDAR_ID, event).execute();
 
         return "Der Termin wurde erfolgreich gebucht!";
     }
-
 }

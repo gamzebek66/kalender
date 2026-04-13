@@ -103,13 +103,27 @@
         }
 
         fetch(`${API_URL}/kalender/freietermine?datum=${datum}`)
+            /*.then(res => res.json())
+            .then(data => {
+
+             */
             .then(res => res.json())
             .then(data => {
+
+                console.log("API RESPONSE:", data);
+
+                // 🔥 HIER IST DER FIX
+                if (!Array.isArray(data)) {
+                    alert("Backend Fehler: " + JSON.stringify(data));
+                    return;
+                }
+
                 const list = document.getElementById("slots");
                 list.innerHTML = "";
 
                 let gefiltert = [];
                 const tag = new Date(datum).getDay(); // 0=So ... 6=Sa
+
 
                 // ----- SAMSTAG SPEZIAL -----
                 if (tag === 6) {
