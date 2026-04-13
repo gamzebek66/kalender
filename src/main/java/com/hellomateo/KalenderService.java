@@ -28,8 +28,8 @@ public class KalenderService {
     private static final int SLOT_MIN = 30;
 
     private static final String CALENDAR_ID =
-           "94ea7920226aeaad6ad5a0e36aa7995b713681e3a5af4069fdf1a89774cb8dcf@group.calendar.google.com";
-             /*"b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";*/
+          /* "94ea7920226aeaad6ad5a0e36aa7995b713681e3a5af4069fdf1a89774cb8dcf@group.calendar.google.com";*/
+             "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
 
