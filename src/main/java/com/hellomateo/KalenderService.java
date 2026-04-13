@@ -25,13 +25,13 @@ public class KalenderService {
     private static final LocalTime END = LocalTime.of(17, 30);
     private static final int SLOT_MIN = 30;
 
-    private static final String CALENDAR_ID = "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";
+    private static final String CALENDAR_ID = /*"b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";*/
 
             /*"6d941a79ec5984008e64e3f2ee6d9a5581a201466f7f02d2dff6e17483474903@group.calendar.google.com";*/
 
 
 
-    /* "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";*/
+    "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
 
