@@ -25,12 +25,7 @@ public class KalenderService {
     private static final LocalTime END = LocalTime.of(17, 30);
     private static final int SLOT_MIN = 60;
 
-    private static final String CALENDAR_ID = /*"b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";*/
-
-            /*"6d941a79ec5984008e64e3f2ee6d9a5581a201466f7f02d2dff6e17483474903@group.calendar.google.com";*/
-
-
-
+    private static final String CALENDAR_ID =
     "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
@@ -72,7 +67,7 @@ public class KalenderService {
                     .setSingleEvents(true)
                     .execute();
         } catch (Exception e) {
-            System.out.println("❌ Google Calendar Fehler:");
+            System.out.println(" Google Calendar Fehler:");
             e.printStackTrace();
             throw e;
         }
@@ -152,7 +147,15 @@ public class KalenderService {
         LocalTime time = LocalTime.parse(request.getUhrzeit());
 
         ZonedDateTime start = ZonedDateTime.of(date, time, ZONE);
-        ZonedDateTime end = start.plusMinutes(30);
+        //ZonedDateTime end = start.plusMinutes(30);
+
+        int duration = 60; // Standard
+
+        if ("Einlagen".equalsIgnoreCase(request.getAnliegen())) {
+            duration = 30;
+        }
+
+        ZonedDateTime end = start.plusMinutes(duration);
 
         Events events = service.events()
                 .list(CALENDAR_ID)
