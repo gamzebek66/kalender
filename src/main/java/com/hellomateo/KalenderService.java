@@ -198,12 +198,12 @@ public class KalenderService {
                 && request.getBeschreibung() != null
                 && !request.getBeschreibung().isBlank()) {
 
-            summaryText = "ANFRAGE - " + request.getVorname() + " " + request.getNachname() + " (Sonstiges)";
+            summaryText = "TERMIN - " + request.getVorname() + " " + request.getNachname() + " (Sonstiges)";
             descriptionText = request.getBeschreibung();
 
         } else {
 
-            summaryText = "ANFRAGE - " + request.getVorname() + " " + request.getNachname();
+            summaryText = "TERMIN - " + request.getVorname() + " " + request.getNachname();
 
             descriptionText =
                     "Name: " + request.getVorname() + " " + request.getNachname() + "\n" +
