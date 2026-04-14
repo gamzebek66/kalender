@@ -23,7 +23,7 @@ public class KalenderService {
     private static final String APPLICATION_NAME = "HelloMateoSync";
     private static final LocalTime START = LocalTime.of(9, 0);
     private static final LocalTime END = LocalTime.of(17, 30);
-    private static final int SLOT_MIN = 30;
+    private static final int SLOT_MIN = 60;
 
     private static final String CALENDAR_ID = /*"b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";*/
 
