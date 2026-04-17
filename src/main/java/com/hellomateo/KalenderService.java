@@ -198,9 +198,16 @@ public class KalenderService {
                 && request.getBeschreibung() != null
                 && !request.getBeschreibung().isBlank()) {
 
-            summaryText = "TERMIN - " + request.getVorname() + " " + request.getNachname() + " (Sonstiges)";
+            summaryText = "TERMIN - "
+                    + request.getVorname() + " "
+                    + request.getNachname() + " (Sonstiges)";
+
             descriptionText = request.getBeschreibung();
 
+            // 👉 Attest-Link hinzufügen
+            if (request.getAttestUrl() != null && !request.getAttestUrl().isBlank()) {
+                descriptionText += "\nAttest: " + request.getAttestUrl();
+            }
         } else {
 
             summaryText = "TERMIN - " + request.getVorname() + " " + request.getNachname();
@@ -209,6 +216,11 @@ public class KalenderService {
                     "Name: " + request.getVorname() + " " + request.getNachname() + "\n" +
                             "Telefon: " + request.getTelefon() + "\n" +
                             "Anliegen: " + request.getAnliegen();
+            //Neu für Bilder
+            if (request.getAttestUrl() != null && !request.getAttestUrl().isBlank()) {
+                descriptionText += "\nAttest: " + request.getAttestUrl();
+            }
+            //Bis hier
         }
 
         event.setSummary(summaryText);

@@ -11,6 +11,22 @@ public class TerminRequest {
     private String anliegen;
     private String beschreibung;
 
+    //Neu für PDF/Bilder
+    private String attestUrl;
+
+
+
+    //auch neu für Bilder
+    public String getAttestUrl() {
+        return attestUrl;
+    }
+
+    public void setAttestUrl(String attestUrl) {
+        this.attestUrl = attestUrl;
+    }
+
+
+
 
     public TerminRequest() {
     }
