@@ -92,6 +92,7 @@ ul {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 12px;
     width: 100%;
+    justify-items: center;
 }
 
 li {
@@ -275,13 +276,14 @@ footer.footer img {
     }
 
     ul {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        grid-template-columns: 1fr;
+        justify-items: center;
     }
 
     li {
         padding: 10px;
         font-size: 14px;
+
     }
 
     #buchungForm {

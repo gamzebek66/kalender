@@ -46,6 +46,11 @@
         <!--<label>Telefonnummer</label><br> -->
         <input type="tel" id="telefon"><br>
 
+        <label>
+            <input type="checkbox" id="attest">
+            Ärztliches Attest vorhanden
+        </label><br>
+
         <button onclick="terminAbsenden()">Termin bestätigen</button>
     </div>
 
@@ -223,6 +228,7 @@
         const nachname = document.getElementById("nachname").value;
         const anliegen = document.getElementById("anliegen").value;
         const sonstiges = document.getElementById("sonstigesText").value;
+        const attest = document.getElementById("attest").checked;
 
         if(!vorname || !nachname || !anliegen){
             alert("Bitte alle Felder ausfüllen!");
