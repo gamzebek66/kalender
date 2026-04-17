@@ -26,7 +26,7 @@ public class KalenderService {
     private static final int SLOT_MIN = 60;
 
     private static final String CALENDAR_ID =
-    "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";
+            "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
 
@@ -139,8 +139,9 @@ public class KalenderService {
                 .build();
     }
 
-    public String terminBuchen(TerminRequest request) {
-        try { Calendar service = getCalendarService();
+    public String terminBuchen(TerminRequest request) throws Exception {
+
+        Calendar service = getCalendarService();
 
         LocalDate date = LocalDate.parse(request.getDatum());
         LocalTime time = LocalTime.parse(request.getUhrzeit());
@@ -197,16 +198,9 @@ public class KalenderService {
                 && request.getBeschreibung() != null
                 && !request.getBeschreibung().isBlank()) {
 
-            summaryText = "TERMIN - "
-                    + request.getVorname() + " "
-                    + request.getNachname() + " (Sonstiges)";
-
+            summaryText = "TERMIN - " + request.getVorname() + " " + request.getNachname() + " (Sonstiges)";
             descriptionText = request.getBeschreibung();
 
-            // 👉 Attest-Link hinzufügen
-            if (request.getAttestUrl() != null && !request.getAttestUrl().isBlank()) {
-                descriptionText += "\nAttest: " + request.getAttestUrl();
-            }
         } else {
 
             summaryText = "TERMIN - " + request.getVorname() + " " + request.getNachname();
@@ -215,11 +209,6 @@ public class KalenderService {
                     "Name: " + request.getVorname() + " " + request.getNachname() + "\n" +
                             "Telefon: " + request.getTelefon() + "\n" +
                             "Anliegen: " + request.getAnliegen();
-            //Neu für Bilder
-            if (request.getAttestUrl() != null && !request.getAttestUrl().isBlank()) {
-                descriptionText += "\nAttest: " + request.getAttestUrl();
-            }
-            //Bis hier
         }
 
         event.setSummary(summaryText);
@@ -235,11 +224,5 @@ public class KalenderService {
         service.events().insert(CALENDAR_ID, event).execute();
 
         return "Der Termin wurde erfolgreich gebucht!";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "FEHLER: " + e.getMessage();
-        }
     }
-
 }
