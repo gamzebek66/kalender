@@ -139,9 +139,8 @@ public class KalenderService {
                 .build();
     }
 
-    public String terminBuchen(TerminRequest request) throws Exception {
-
-        Calendar service = getCalendarService();
+    public String terminBuchen(TerminRequest request) {
+        try { Calendar service = getCalendarService();
 
         LocalDate date = LocalDate.parse(request.getDatum());
         LocalTime time = LocalTime.parse(request.getUhrzeit());
@@ -236,5 +235,11 @@ public class KalenderService {
         service.events().insert(CALENDAR_ID, event).execute();
 
         return "Der Termin wurde erfolgreich gebucht!";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "FEHLER: " + e.getMessage();
+        }
     }
+
 }
