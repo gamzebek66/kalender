@@ -48,8 +48,12 @@
 
         <label>
             <input type="checkbox" id="attest">
-            Ärztliches Attest vorhanden
-        </label><br>
+            Ich habe eine Verordnung
+        </label>
+
+        <div id="uploadBox" style="display:none;">
+            <input type="file" id="verordnungDatei" accept="image/*,.pdf">
+        </div>
 
         <button onclick="terminAbsenden()">Termin bestätigen</button>
     </div>
@@ -228,7 +232,7 @@
         const nachname = document.getElementById("nachname").value;
         const anliegen = document.getElementById("anliegen").value;
         const sonstiges = document.getElementById("sonstigesText").value;
-        const attest = document.getElementById("attest").checked;
+        const verordnung = document.getElementById("verordnung").checked;
 
         if(!vorname || !nachname || !anliegen){
             alert("Bitte alle Felder ausfüllen!");
@@ -243,6 +247,7 @@
         const telefon = iti.getNumber();
         const telefonFormatiert = telefon.replace(/^(\+\d{2})(\d+)/, "$1 $2");
 
+        /*
         fetch(`${API_URL}/kalender/buchen`,{
             method:"POST",
             headers:{"Content-Type":"application/json"},
@@ -254,12 +259,44 @@
                 //telefon,
                 telefon: telefonFormatiert, // optional (falls Backend nutzt)
                 anliegen,
-                attest,
+                verordnung: verordnung,
                 beschreibung: "Name " + vorname + " " + nachname + "\n"+
                     "Telefon: " + telefon +
                     "\n" + "Anliegen " + sonstiges
             })
         })
+            */
+
+        const formData = new FormData();
+
+        formData.append("datum", gewaehltesDatum);
+        formData.append("uhrzeit", gewaehlteUhrzeit);
+        formData.append("vorname", vorname);
+        formData.append("nachname", nachname);
+        formData.append("telefon", telefonFormatiert);
+        formData.append("anliegen", anliegen);
+        formData.append("beschreibung", sonstiges);
+
+        const file = document.getElementById("verordnungDatei").files[0];
+        if (file) {
+            formData.append("verordnung", file);
+        }
+
+        fetch(`${API_URL}/kalender/buchen`, {
+            method: "POST",
+            body: formData
+        })
+            .then(res => res.text())
+            .then(msg => {
+                alert(msg);
+                ladeTermine();
+
+                document.getElementById("buchungForm").classList.remove("aktiv");
+                document.getElementById("overlay").classList.remove("aktiv");
+            });
+            //Ausgeklammert Falls das doch nicht passen sollte
+
+            /*
             .then(res=>res.text())
             .then(msg=>{
                 alert(msg);
@@ -268,6 +305,8 @@
                 document.getElementById("buchungForm").classList.remove("aktiv");
                 document.getElementById("overlay").classList.remove("aktiv");
             });
+
+             */
     }
 
     document.getElementById("overlay").onclick=()=>{

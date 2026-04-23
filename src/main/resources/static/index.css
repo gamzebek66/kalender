@@ -287,7 +287,8 @@ footer.footer img {
     }
 
     #buchungForm {
-        width: 92%;
+        width: 90%;
+        max-width: 320px;
         padding: 20px;
         margin: auto;
     }
@@ -300,6 +301,18 @@ footer.footer img {
         width: 100%;
         margin: 0 auto;
         box-sizing: border-box;
+    }
+
+    #buchungForm input {
+        width: 100%;
+    }
+
+    #buchungForm .iti {
+        width: 100% !important;
+    }
+
+    #buchungForm button {
+        width: 100%;
     }
 
 }
