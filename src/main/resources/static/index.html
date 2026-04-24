@@ -47,7 +47,7 @@
         <input type="tel" id="telefon"><br>
 
         <label>
-            <input type="checkbox" id="attest">
+            <input type="checkbox" id="verordnung">
             Ich habe eine Verordnung
         </label>
 
@@ -309,10 +309,17 @@
              */
     }
 
-    document.getElementById("overlay").onclick=()=>{
+
+    document.getElementById("overlay").onclick = () => {
         document.getElementById("buchungForm").classList.remove("aktiv");
         document.getElementById("overlay").classList.remove("aktiv");
     };
+
+
+    document.getElementById("verordnung").addEventListener("change", function () {
+        document.getElementById("uploadBox").style.display =
+            this.checked ? "block" : "none";
+    });
 </script>
 
 </body>

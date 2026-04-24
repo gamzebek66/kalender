@@ -248,6 +248,8 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
 
+import com.google.api.client.http.InputStreamContent;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -429,7 +431,10 @@ public class KalenderService {
 
         // Datei Info (nur Anzeige erstmal)
         if (verordnung != null && !verordnung.isEmpty()) {
-            descriptionText += "Verordnung: vorhanden (" + verordnung.getOriginalFilename() + ")";
+
+            String driveLink = uploadToDrive(verordnung);
+
+            descriptionText += "Verordnung: " + driveLink;
         } else {
             descriptionText += "Verordnung: keine";
         }
@@ -448,6 +453,52 @@ public class KalenderService {
 
         return "Der Termin wurde erfolgreich gebucht!";
     }
+
+
+    private String uploadToDrive(MultipartFile file) throws Exception {
+
+        String credentials = System.getenv("GOOGLE_CREDENTIALS");
+
+        InputStream in = new ByteArrayInputStream(credentials.getBytes());
+
+        GoogleCredential credential = GoogleCredential.fromStream(in)
+                .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive"));
+
+        com.google.api.services.drive.Drive driveService =
+                new com.google.api.services.drive.Drive.Builder(
+                        GoogleNetHttpTransport.newTrustedTransport(),
+                        JacksonFactory.getDefaultInstance(),
+                        credential)
+                        .setApplicationName("HelloMateoDrive")
+                        .build();
+
+        com.google.api.services.drive.model.File fileMetadata =
+                new com.google.api.services.drive.model.File();
+
+        fileMetadata.setName(file.getOriginalFilename());
+
+        InputStreamContent mediaContent = new InputStreamContent(
+                file.getContentType(),
+                file.getInputStream()
+        );
+
+        com.google.api.services.drive.model.File uploadedFile =
+                driveService.files().create(fileMetadata, mediaContent)
+                        .setFields("id")
+                        .execute();
+
+        // öffentlich zugänglich machen
+        driveService.permissions().create(
+                uploadedFile.getId(),
+                new com.google.api.services.drive.model.Permission()
+                        .setType("anyone")
+                        .setRole("reader")
+        ).execute();
+
+        return "https://drive.google.com/file/d/" + uploadedFile.getId() + "/view";
+    }
+
+
 
     // ---------------------------------------------------------
     // GOOGLE CALENDAR SERVICE

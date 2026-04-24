@@ -51,7 +51,7 @@ public class KalenderController {
      */
 
 
-    @PostMapping("/buchen")
+    @PostMapping(value = "/buchen", consumes = "multipart/form-data")
     public String terminBuchen(
             @RequestParam String datum,
             @RequestParam String uhrzeit,
