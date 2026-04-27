@@ -477,7 +477,12 @@ public class KalenderService {
 
     private String uploadToDrive(MultipartFile file) throws Exception {
 
+        //neu
         String credentials = System.getenv("GOOGLE_CREDENTIALS");
+
+        System.out.println("GOOGLE_CREDENTIALS = " + credentials);
+        //bis hier in
+
 
         InputStream in = new ByteArrayInputStream(credentials.getBytes());
 
