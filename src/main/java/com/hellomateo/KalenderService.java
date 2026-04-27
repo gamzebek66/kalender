@@ -429,12 +429,32 @@ public class KalenderService {
             descriptionText += "Beschreibung: " + beschreibung + "\n";
         }
 
+        /*
         // Datei Info (nur Anzeige erstmal)
         if (verordnung != null && !verordnung.isEmpty()) {
 
             String driveLink = uploadToDrive(verordnung);
 
             descriptionText += "Verordnung: " + driveLink;
+        } else {
+            descriptionText += "Verordnung: keine";
+        }
+
+         */
+
+        if (verordnung != null && !verordnung.isEmpty()) {
+
+            String driveLink = "FEHLER";
+
+            try {
+                driveLink = uploadToDrive(verordnung);
+            } catch (Exception e) {
+                e.printStackTrace();
+                driveLink = "UPLOAD FEHLGESCHLAGEN";
+            }
+
+            descriptionText += "Verordnung:\n" + driveLink + "\n";
+
         } else {
             descriptionText += "Verordnung: keine";
         }
