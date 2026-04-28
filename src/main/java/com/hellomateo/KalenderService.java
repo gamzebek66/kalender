@@ -310,7 +310,8 @@ public class KalenderService {
         // --------------------------------------------------
         // 3. In InputStream umwandeln
         // --------------------------------------------------
-        InputStream in = new ByteArrayInputStream(credentials.getBytes());
+        //InputStream in = new ByteArrayInputStream(credentials.getBytes());
+        InputStream in = new ByteArrayInputStream(credentials.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
         // --------------------------------------------------
         // 4. Google Auth
