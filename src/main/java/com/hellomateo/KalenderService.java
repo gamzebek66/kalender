@@ -33,9 +33,7 @@ public class KalenderService {
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
 
-    // ---------------------------------------------------------
-    // FREIE TERMINE
-    // ---------------------------------------------------------
+
     public List<String> getFreieSlots(LocalDate datum) throws Exception {
 
         System.out.println("👉 getFreieSlots gestartet: " + datum);
@@ -113,9 +111,7 @@ public class KalenderService {
         return freieSlots;
     }
 
-    // ---------------------------------------------------------
-    // TERMIN BUCHEN (NEUE VERSION MIT FILE)
-    // ---------------------------------------------------------
+
     public String terminBuchen(
             String datum,
             String uhrzeit,
@@ -175,9 +171,7 @@ public class KalenderService {
             }
         }
 
-        // -----------------------------------------------------
-        // EVENT ERSTELLEN
-        // -----------------------------------------------------
+
         Event event = new Event();
 
         String summary = "TERMIN - " + vorname + " " + nachname;
@@ -236,63 +230,10 @@ public class KalenderService {
         return "Der Termin wurde erfolgreich gebucht!";
     }
 
-/*
-    private String uploadToDrive(MultipartFile file) throws Exception {
-
-
-        //neu
-        String credentials = System.getenv("GOOGLE_CREDENTIALS");
-
-        System.out.println("GOOGLE_CREDENTIALS = " + credentials);
-        //bis hier in
-
-
-        InputStream in = new ByteArrayInputStream(credentials.getBytes());
-
-        GoogleCredential credential = GoogleCredential.fromStream(in)
-                .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive"));
-
-        com.google.api.services.drive.Drive driveService =
-                new com.google.api.services.drive.Drive.Builder(
-                        GoogleNetHttpTransport.newTrustedTransport(),
-                        JacksonFactory.getDefaultInstance(),
-                        credential)
-                        .setApplicationName("HelloMateoDrive")
-                        .build();
-
-        com.google.api.services.drive.model.File fileMetadata =
-                new com.google.api.services.drive.model.File();
-
-        fileMetadata.setName(file.getOriginalFilename());
-
-        InputStreamContent mediaContent = new InputStreamContent(
-                file.getContentType(),
-                file.getInputStream()
-        );
-
-        com.google.api.services.drive.model.File uploadedFile =
-                driveService.files().create(fileMetadata, mediaContent)
-                        .setFields("id")
-                        .execute();
-
-        // öffentlich zugänglich machen
-        driveService.permissions().create(
-                uploadedFile.getId(),
-                new com.google.api.services.drive.model.Permission()
-                        .setType("anyone")
-                        .setRole("reader")
-        ).execute();
-
-        return "https://drive.google.com/file/d/" + uploadedFile.getId() + "/view";
-    }
-
- */
 
     private String uploadToDrive(MultipartFile file) throws Exception {
 
-        // --------------------------------------------------
-        // 1. ENV laden
-        // --------------------------------------------------
+
         String credentials = System.getenv("GOOGLE_CREDENTIALS");
 
         if (credentials == null || credentials.isBlank()) {
@@ -302,20 +243,14 @@ public class KalenderService {
         System.out.println("ENV vorhanden: true");
         System.out.println("Credentials Länge: " + credentials.length());
 
-        // --------------------------------------------------
-        // 2. 🔥 WICHTIG: \n fixen
-        // --------------------------------------------------
+
         credentials = credentials.replace("\\n", "\n");
 
-        // --------------------------------------------------
-        // 3. In InputStream umwandeln
-        // --------------------------------------------------
+
         //InputStream in = new ByteArrayInputStream(credentials.getBytes());
         InputStream in = new ByteArrayInputStream(credentials.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
-        // --------------------------------------------------
-        // 4. Google Auth
-        // --------------------------------------------------
+
         GoogleCredential credential = GoogleCredential.fromStream(in)
                 .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive"));
 
@@ -329,22 +264,30 @@ public class KalenderService {
 
         System.out.println("Google Drive Service erstellt");
 
-        // --------------------------------------------------
-        // 5. Datei vorbereiten
-        // --------------------------------------------------
+
         com.google.api.services.drive.model.File fileMetadata =
                 new com.google.api.services.drive.model.File();
 
+
+
+
         fileMetadata.setName(file.getOriginalFilename());
+
+
+        fileMetadata.setParents(
+                Collections.singletonList("1xsaQQTGGupNZ2p74ept6woGts5nv4o32")
+        );
+
+
+
+
 
         InputStreamContent mediaContent = new InputStreamContent(
                 file.getContentType(),
                 file.getInputStream()
         );
 
-        // --------------------------------------------------
-        // 6. Upload
-        // --------------------------------------------------
+
         com.google.api.services.drive.model.File uploadedFile =
                 driveService.files().create(fileMetadata, mediaContent)
                         .setFields("id")
@@ -352,9 +295,7 @@ public class KalenderService {
 
         System.out.println("Datei hochgeladen, ID: " + uploadedFile.getId());
 
-        // --------------------------------------------------
-        // 7. Öffentlich machen
-        // --------------------------------------------------
+
         driveService.permissions().create(
                 uploadedFile.getId(),
                 new com.google.api.services.drive.model.Permission()
@@ -364,17 +305,13 @@ public class KalenderService {
 
         System.out.println("Datei öffentlich freigegeben");
 
-        // --------------------------------------------------
-        // 8. Link zurückgeben
-        // --------------------------------------------------
+
         return "https://drive.google.com/file/d/" + uploadedFile.getId() + "/view";
     }
 
 
 
-    // ---------------------------------------------------------
-    // GOOGLE CALENDAR SERVICE
-    // ---------------------------------------------------------
+
     private Calendar getCalendarService() throws Exception {
 
         String credentials = System.getenv("GOOGLE_CREDENTIALS");
