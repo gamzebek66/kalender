@@ -270,14 +270,11 @@ public class KalenderService {
 
         fileMetadata.setName(file.getOriginalFilename());
 
-        // 🔥 HIER rein
-        fileMetadata.setParents(
-                Collections.singletonList("1xsaQQTGGupNZ2p74ept6woGts5nv4o32")
-        );
 
         fileMetadata.setParents(
                 Collections.singletonList("1xsaQQTGGupNZ2p74ept6woGts5nv4o32")
         );
+
 
 
 
@@ -296,6 +293,8 @@ public class KalenderService {
 
         System.out.println("Datei hochgeladen, ID: " + uploadedFile.getId());
 
+        //neu zum tetsen
+        System.out.println("FOLDER ID USED: 1xsaQQTGGupNZ2p74ept6woGts5nv4o32");
 
         driveService.permissions().create(
                 uploadedFile.getId(),
