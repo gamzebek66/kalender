@@ -268,11 +268,12 @@ public class KalenderService {
         com.google.api.services.drive.model.File fileMetadata =
                 new com.google.api.services.drive.model.File();
 
-
-
-
         fileMetadata.setName(file.getOriginalFilename());
 
+        // 🔥 HIER rein
+        fileMetadata.setParents(
+                Collections.singletonList("1xsaQQTGGupNZ2p74ept6woGts5nv4o32")
+        );
 
         fileMetadata.setParents(
                 Collections.singletonList("1xsaQQTGGupNZ2p74ept6woGts5nv4o32")
