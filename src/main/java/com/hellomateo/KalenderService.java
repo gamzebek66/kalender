@@ -10,8 +10,6 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.api.services.calendar.model.EventDateTime;
 
-import com.google.api.client.http.InputStreamContent;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,7 +30,6 @@ public class KalenderService {
             "b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com";
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
-
 
     public List<String> getFreieSlots(LocalDate datum) throws Exception {
 
@@ -111,7 +108,6 @@ public class KalenderService {
         return freieSlots;
     }
 
-
     public String terminBuchen(
             String datum,
             String uhrzeit,
@@ -171,7 +167,6 @@ public class KalenderService {
             }
         }
 
-
         Event event = new Event();
 
         String summary = "TERMIN - " + vorname + " " + nachname;
@@ -185,34 +180,15 @@ public class KalenderService {
             descriptionText += "Beschreibung: " + beschreibung + "\n";
         }
 
-        /*
-        // Datei Info (nur Anzeige erstmal)
         if (verordnung != null && !verordnung.isEmpty()) {
 
-            String driveLink = uploadToDrive(verordnung);
+            descriptionText += "Verordnung: JA\n";
 
-            descriptionText += "Verordnung: " + driveLink;
-        } else {
-            descriptionText += "Verordnung: keine";
-        }
-
-         */
-
-        if (verordnung != null && !verordnung.isEmpty()) {
-
-            String driveLink = "FEHLER";
-
-            try {
-                driveLink = uploadToDrive(verordnung);
-            } catch (Exception e) {
-                e.printStackTrace();
-                driveLink = "UPLOAD FEHLGESCHLAGEN";
-            }
-
-            descriptionText += "Verordnung:\n" + driveLink + "\n";
+            System.out.println("Datei erhalten: " + verordnung.getOriginalFilename());
 
         } else {
-            descriptionText += "Verordnung: keine";
+
+            descriptionText += "Verordnung: NEIN\n";
         }
 
         event.setSummary(summary);
@@ -230,88 +206,6 @@ public class KalenderService {
         return "Der Termin wurde erfolgreich gebucht!";
     }
 
-
-    private String uploadToDrive(MultipartFile file) throws Exception {
-
-
-        String credentials = System.getenv("GOOGLE_CREDENTIALS");
-
-        if (credentials == null || credentials.isBlank()) {
-            throw new RuntimeException("GOOGLE_CREDENTIALS ist NICHT gesetzt!");
-        }
-
-        System.out.println("ENV vorhanden: true");
-        System.out.println("Credentials Länge: " + credentials.length());
-
-
-        credentials = credentials.replace("\\n", "\n");
-
-
-        //InputStream in = new ByteArrayInputStream(credentials.getBytes());
-        InputStream in = new ByteArrayInputStream(credentials.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-
-
-        GoogleCredential credential = GoogleCredential.fromStream(in)
-                .createScoped(Collections.singleton("https://www.googleapis.com/auth/drive"));
-
-        com.google.api.services.drive.Drive driveService =
-                new com.google.api.services.drive.Drive.Builder(
-                        GoogleNetHttpTransport.newTrustedTransport(),
-                        JacksonFactory.getDefaultInstance(),
-                        credential)
-                        .setApplicationName("HelloMateoDrive")
-                        .build();
-
-        System.out.println("Google Drive Service erstellt");
-
-
-        com.google.api.services.drive.model.File fileMetadata =
-                new com.google.api.services.drive.model.File();
-
-        fileMetadata.setName(file.getOriginalFilename());
-
-
-        fileMetadata.setParents(
-                Collections.singletonList("1xsaQQTGGupNZ2p74ept6woGts5nv4o32")
-        );
-
-
-
-
-
-
-        InputStreamContent mediaContent = new InputStreamContent(
-                file.getContentType(),
-                file.getInputStream()
-        );
-
-
-        com.google.api.services.drive.model.File uploadedFile =
-                driveService.files().create(fileMetadata, mediaContent)
-                        .setFields("id")
-                        .execute();
-
-        System.out.println("Datei hochgeladen, ID: " + uploadedFile.getId());
-
-        //neu zum tetsen
-        System.out.println("FOLDER ID USED: 1xsaQQTGGupNZ2p74ept6woGts5nv4o32");
-
-        driveService.permissions().create(
-                uploadedFile.getId(),
-                new com.google.api.services.drive.model.Permission()
-                        .setType("anyone")
-                        .setRole("reader")
-        ).execute();
-
-        System.out.println("Datei öffentlich freigegeben");
-
-
-        return "https://drive.google.com/file/d/" + uploadedFile.getId() + "/view";
-    }
-
-
-
-
     private Calendar getCalendarService() throws Exception {
 
         String credentials = System.getenv("GOOGLE_CREDENTIALS");
@@ -320,7 +214,7 @@ public class KalenderService {
             throw new RuntimeException("GOOGLE_CREDENTIALS ist NICHT gesetzt!");
         }
 
-        // 🔥 WICHTIGER FIX (GENAU WIE BEI DRIVE)
+
         credentials = credentials.replace("\\n", "\n");
 
         InputStream in = new ByteArrayInputStream(credentials.getBytes());
