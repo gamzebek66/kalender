@@ -15,6 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.*;
 import java.util.*;
 
@@ -180,11 +184,44 @@ public class KalenderService {
             descriptionText += "Beschreibung: " + beschreibung + "\n";
         }
 
+        /*
         if (verordnung != null && !verordnung.isEmpty()) {
 
             descriptionText += "Verordnung: JA\n";
 
             System.out.println("Datei erhalten: " + verordnung.getOriginalFilename());
+
+        } else {
+
+            descriptionText += "Verordnung: NEIN\n";
+        }
+
+         */
+
+        if (verordnung != null && !verordnung.isEmpty()) {
+
+            String dateiname =
+                    System.currentTimeMillis() + "_" +
+                            verordnung.getOriginalFilename();
+
+            Path uploadPfad = Paths.get("uploads");
+
+            if (!Files.exists(uploadPfad)) {
+                Files.createDirectories(uploadPfad);
+            }
+
+            Path dateiPfad = uploadPfad.resolve(dateiname);
+
+            Files.copy(
+                    verordnung.getInputStream(),
+                    dateiPfad,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+
+            System.out.println("Datei gespeichert: " + dateiPfad);
+
+            descriptionText += "Verordnung: JA\n";
+            descriptionText += "Datei: " + dateiname + "\n";
 
         } else {
 
