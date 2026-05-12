@@ -26,31 +26,6 @@ public class KalenderController {
         return kalenderService.getFreieSlots(date);
     }
 
-    /*
-    @PostMapping("/buchen")
-    public String terminBuchen(@RequestBody TerminRequest request) throws Exception
-    {
-
-
-
-
-
-        // Zum Prüfen kann später gelösct werden wird auch gelöscht
-        System.out.println("Datum: " + request.getDatum());
-        System.out.println("Uhrzeit: " + request.getUhrzeit());
-        System.out.println("Name: " + request.getVorname());
-        System.out.println("Nachname: " + request.getNachname());
-        System.out.println("Telefon: " + request.getTelefon());
-        System.out.println("Anliegen: " + request.getAnliegen());
-
-
-
-        return kalenderService.terminBuchen(request);
-    }
-
-     */
-
-
     @PostMapping(value = "/buchen", consumes = "multipart/form-data")
     public String terminBuchen(
             @RequestParam String datum,
@@ -90,6 +65,14 @@ public class KalenderController {
     public String home() {
         return "API läuft 🚀 - nutze /kalender/freietermine";
     }
+
+    @GetMapping("admin/termine")
+    public List <Termin> getAllTermine() {
+
+        return TerminStorage.ladeAlleTermine();
+
+    }
+
 
 
 

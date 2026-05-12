@@ -35,6 +35,9 @@ public class KalenderService {
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
 
+    private static List<Termin> termine =  //eine private Liste von Terminen
+            TerminStorage.ladeAlleTermine(); //Hier wird alle Temrine aus dem JSON in eine Liste von Terminen gespeichert
+
     public List<String> getFreieSlots(LocalDate datum) throws Exception {
 
         System.out.println("👉 getFreieSlots gestartet: " + datum);
@@ -131,6 +134,7 @@ public class KalenderService {
         ZonedDateTime start = ZonedDateTime.of(date, time, ZONE);
 
         int duration = 60;
+        String dateiname = null;
 
         if ("Einlagen".equalsIgnoreCase(anliegen)) {
             duration = 30;
@@ -184,23 +188,15 @@ public class KalenderService {
             descriptionText += "Beschreibung: " + beschreibung + "\n";
         }
 
-        /*
-        if (verordnung != null && !verordnung.isEmpty()) {
 
-            descriptionText += "Verordnung: JA\n";
+        //neuer Codeteil JSON überarbeitung
 
-            System.out.println("Datei erhalten: " + verordnung.getOriginalFilename());
+        
 
-        } else {
-
-            descriptionText += "Verordnung: NEIN\n";
-        }
-
-         */
 
         if (verordnung != null && !verordnung.isEmpty()) {
 
-            String dateiname =
+            dateiname =
                     System.currentTimeMillis() + "_" +
                             verordnung.getOriginalFilename();
 
@@ -227,6 +223,30 @@ public class KalenderService {
 
             descriptionText += "Verordnung: NEIN\n";
         }
+
+
+
+        Termin termin = new Termin();
+
+        termin.setVorname(vorname);
+        termin.setNachname(nachname);
+        termin.setDatum(datum);
+        termin.setUhrzeit(uhrzeit);
+
+        boolean hatVerordnung =
+                verordnung != null && !verordnung.isEmpty();
+
+        termin.setVerordnung(hatVerordnung);
+
+        if (hatVerordnung) {
+            termin.setDateiname(dateiname);
+        }
+
+        termine.add(termin);
+
+        TerminStorage.speichereTermine(termine);
+
+
 
         event.setSummary(summary);
         event.setDescription(descriptionText);
