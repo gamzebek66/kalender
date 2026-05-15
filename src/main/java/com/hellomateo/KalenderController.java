@@ -2,9 +2,18 @@ package com.hellomateo;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
+
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+
 
 @RestController
 @RequestMapping("/kalender")
@@ -66,12 +75,7 @@ public class KalenderController {
         return "API läuft 🚀 - nutze /kalender/freietermine";
     }
 
-    @GetMapping("admin/termine")
-    public List <Termin> getAllTermine() {
 
-        return TerminStorage.ladeAlleTermine();
-
-    }
 
 
 

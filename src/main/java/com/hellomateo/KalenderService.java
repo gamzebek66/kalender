@@ -242,10 +242,17 @@ public class KalenderService {
             termin.setDateiname(dateiname);
         }
 
+        /*
+        termine.add(termin);
+        TerminStorage.speichereTermine(termine);
+
+         */
+
+        List<Termin> termine = TerminStorage.ladeAlleTermine();
+
         termine.add(termin);
 
         TerminStorage.speichereTermine(termine);
-
 
 
         event.setSummary(summary);
