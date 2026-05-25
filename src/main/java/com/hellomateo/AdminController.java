@@ -17,10 +17,16 @@ import java.util.List;
 @CrossOrigin
 public class AdminController
 {
+    private final KalenderService kalenderService;
+
+    public AdminController(KalenderService kalenderService) {
+        this.kalenderService = kalenderService;
+    }
+
+    // 🔥 FIX: keine TerminStorage mehr
     @GetMapping("/termine")
     public List<Termin> getAlleTermine() {
-
-        return TerminStorage.ladeAlleTermine();
+        return kalenderService.getAlleTermine();
     }
 
     @GetMapping("/verordnung/{dateiname}")

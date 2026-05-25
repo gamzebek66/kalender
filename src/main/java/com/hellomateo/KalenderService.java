@@ -13,6 +13,9 @@ import com.google.api.services.calendar.model.EventDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -285,4 +288,11 @@ public class KalenderService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
+
+    // Neu
+
+    public List<Termin> getAlleTermine() {
+        return new ArrayList<>();
+    }
 }
+
