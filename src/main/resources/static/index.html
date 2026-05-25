@@ -9,6 +9,9 @@
 </head>
 
 <body>
+
+<button id="adminLoginBtn">Admin Login</button>
+
 <div class="wrapper">
     <div class="content">
         <h1>Terminbuchung</h1>
@@ -25,7 +28,7 @@
             <option value="Sonstiges">Sonstiges</option>
         </select>
 
-        <textarea id="sonstigesText" placeholder="Bitte Anliegen beschreiben" style="display:none;"></textarea>
+        <textarea id="sonstigesText" style="display:none;" placeholder="Bitte Anliegen beschreiben"></textarea>
 
         <p>Datum auswählen:</p>
         <input type="date" id="datum">
@@ -40,10 +43,9 @@
 
     <div id="buchungForm">
         <div id="auswahlInfo"></div>
+
         <input type="text" id="vorname" placeholder="Vorname"><br>
         <input type="text" id="nachname" placeholder="Nachname"><br>
-
-        <!--<label>Telefonnummer</label><br> -->
         <input type="tel" id="telefon"><br>
 
         <label>
@@ -61,6 +63,12 @@
     <footer class="footer">
         <img src="Logo.png" alt="Logo">
     </footer>
+
+    <!-- 🔥 ADMIN PANEL -->
+    <div id="adminPanel" class="hidden">
+        <div id="adminContent"></div>
+    </div>
+
 </div>
 
 <!-- intl-tel-input -->
@@ -78,26 +86,15 @@
 
 <script>
     const API_URL = "https://kalender-3lt5.onrender.com";
+
     let gewaehltesDatum = "";
     let gewaehlteUhrzeit = "";
 
-    const Feiertage = [
-        "2026-05-01",
-        "2026-05-14",
-        "2026-05-25",
-        "2026-08-03",
-        "2026-12-24",
-        "2026-12-25",
-        "2026-12-26",
-        "2026-12-27",
-        "2026-12-28",
-        "2026-12-29",
-        "2026-12-30",
-        "2026-12-31",
-        "2027-01-01"
-    ];
-
+    /* -----------------------
+       TERMINE LADEN
+    ----------------------- */
     function ladeTermine() {
+
         const datum = document.getElementById("datum").value;
         const anliegen = document.getElementById("anliegen").value;
 
@@ -106,102 +103,14 @@
             return;
         }
 
-        if (Feiertage.includes(datum)) {
-            alert("Es tut uns leid, aber an diesem Tag ist die SaniTheke aufgrund von Feiertagen geschlossen.");
-            return;
-        }
-
         fetch(`${API_URL}/kalender/freietermine?datum=${datum}`)
             .then(res => res.json())
             .then(data => {
 
-                console.log("API RESPONSE:", data);
-
-                if (!Array.isArray(data)) {
-                    alert("Backend Fehler: " + JSON.stringify(data));
-                    return;
-                }
-
                 const list = document.getElementById("slots");
                 list.innerHTML = "";
 
-                let gefiltert = [];
-                const tag = new Date(datum).getDay(); // 0=So ... 6=Sa
-
-
-                // ----- SAMSTAG SPEZIAL -----
-                if (tag === 6) {
-                    if (anliegen === "Einlagen" || anliegen === "Orthesen" || anliegen === "Kompression" || anliegen === "Rezept") {
-                        gefiltert = data.filter(zeit => {
-                            const [h, m] = zeit.split(":").map(Number);
-                            return h >= 12 && h < 15 && (m === 0 || m === 30);
-                        });
-                    } else if (anliegen === "EDS") {
-                        list.innerHTML = "<li>EDS Termine sind nur Montag bis Freitag möglich.</li>";
-                        return;
-                    } else if (anliegen === "Prothesen") {
-                        list.innerHTML = "<li>Prothesen Termine sind nur Mittwoch und Donnerstag möglich.</li>";
-                        return;
-                    } else {
-                        // Sonstiges oder andere Anliegen am Samstag
-                        gefiltert = [];
-                    }
-                } else {
-
-                    if (anliegen === "Einlagen") {
-                        gefiltert = data.filter(zeit => {
-                            const [h, m] = zeit.split(":").map(Number);
-                            return h >= 9 && h <= 17 && (m === 0 || m === 30);
-                        });
-                    }
-
-                    if (anliegen === "Kompression") {
-                        gefiltert = data.filter(zeit => {
-                            const [h, m] = zeit.split(":").map(Number);
-                            return h >= 9 && h < 14 && m === 0;
-                        });
-                    }
-
-                    if (anliegen === "Orthesen") {
-                        gefiltert = data.filter(zeit => {
-                            const [h, m] = zeit.split(":").map(Number);
-                            return h >= 10 && h < 17 && m === 0;
-                        });
-                    }
-
-                    if (anliegen === "EDS") {
-                        gefiltert = data.filter(zeit => {
-                            const [h, m] = zeit.split(":").map(Number);
-                            return h >= 10 && h < 14 && m === 0;
-                        });
-                    }
-
-                    if (anliegen === "Prothesen") {
-                        if (tag === 3 || tag === 4) {
-                            gefiltert = data.filter(zeit => {
-                                const [h, m] = zeit.split(":").map(Number);
-                                return h >= 14 && h < 18 && m === 0;
-                            });
-                        } else {
-                            list.innerHTML = "<li>Prothesen Termine sind nur Mittwoch und Donnerstag möglich.</li>";
-                            return;
-                        }
-                    }
-
-                    if (anliegen === "Sonstiges") {
-                        gefiltert = data.filter(zeit => {
-                            const [h, m] = zeit.split(":").map(Number);
-                            return h >= 10 && h < 14 && m === 0;
-                        });
-                    }
-                }
-
-                if (gefiltert.length === 0) {
-                    list.innerHTML = "<li>Keine passenden Termine</li>";
-                    return;
-                }
-
-                gefiltert.forEach(slot => {
+                data.forEach(slot => {
                     const li = document.createElement("li");
                     li.innerText = slot;
                     li.onclick = () => buchen(datum, slot);
@@ -210,7 +119,10 @@
             });
     }
 
-    function buchen(datum, uhrzeit){
+    /* -----------------------
+       BUCHEN
+    ----------------------- */
+    function buchen(datum, uhrzeit) {
         gewaehltesDatum = datum;
         gewaehlteUhrzeit = uhrzeit;
 
@@ -221,20 +133,27 @@
         document.getElementById("overlay").classList.add("aktiv");
     }
 
-    function zeigeSonstigesFeld(){
+    /* -----------------------
+       SONSTIGES FELD
+    ----------------------- */
+    function zeigeSonstigesFeld() {
         const auswahl = document.getElementById("anliegen").value;
+
         document.getElementById("sonstigesText").style.display =
             (auswahl === "Sonstiges") ? "block" : "none";
     }
 
-    function terminAbsenden(){
+    /* -----------------------
+       TERMIN ABSENDEN
+    ----------------------- */
+    function terminAbsenden() {
+
         const vorname = document.getElementById("vorname").value;
         const nachname = document.getElementById("nachname").value;
         const anliegen = document.getElementById("anliegen").value;
         const sonstiges = document.getElementById("sonstigesText").value;
-        const verordnung = document.getElementById("verordnung").checked;
 
-        if(!vorname || !nachname || !anliegen){
+        if (!vorname || !nachname || !anliegen) {
             alert("Bitte alle Felder ausfüllen!");
             return;
         }
@@ -245,27 +164,6 @@
         }
 
         const telefon = iti.getNumber();
-        const telefonFormatiert = telefon.replace(/^(\+\d{2})(\d+)/, "$1 $2");
-
-        /*
-        fetch(`${API_URL}/kalender/buchen`,{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({
-                datum:gewaehltesDatum,
-                uhrzeit:gewaehlteUhrzeit,
-                vorname,
-                nachname,
-                //telefon,
-                telefon: telefonFormatiert, // optional (falls Backend nutzt)
-                anliegen,
-                verordnung: verordnung,
-                beschreibung: "Name " + vorname + " " + nachname + "\n"+
-                    "Telefon: " + telefon +
-                    "\n" + "Anliegen " + sonstiges
-            })
-        })
-            */
 
         const formData = new FormData();
 
@@ -273,7 +171,7 @@
         formData.append("uhrzeit", gewaehlteUhrzeit);
         formData.append("vorname", vorname);
         formData.append("nachname", nachname);
-        formData.append("telefon", telefonFormatiert);
+        formData.append("telefon", telefon);
         formData.append("anliegen", anliegen);
         formData.append("beschreibung", sonstiges);
 
@@ -294,32 +192,79 @@
                 document.getElementById("buchungForm").classList.remove("aktiv");
                 document.getElementById("overlay").classList.remove("aktiv");
             });
-            //Ausgeklammert Falls das doch nicht passen sollte
-
-            /*
-            .then(res=>res.text())
-            .then(msg=>{
-                alert(msg);
-                ladeTermine();
-
-                document.getElementById("buchungForm").classList.remove("aktiv");
-                document.getElementById("overlay").classList.remove("aktiv");
-            });
-
-             */
     }
 
-
+    /* -----------------------
+       OVERLAY
+    ----------------------- */
     document.getElementById("overlay").onclick = () => {
         document.getElementById("buchungForm").classList.remove("aktiv");
         document.getElementById("overlay").classList.remove("aktiv");
     };
 
-
     document.getElementById("verordnung").addEventListener("change", function () {
         document.getElementById("uploadBox").style.display =
             this.checked ? "block" : "none";
     });
+
+    /* -----------------------
+       ADMIN LOGIN (FIXED)
+    ----------------------- */
+    window.addEventListener("load", () => {
+
+        document.getElementById("adminLoginBtn").onclick = () => {
+
+            const pw = prompt("Admin Passwort:");
+
+            if (pw === "1234") {
+                document.getElementById("adminPanel").classList.remove("hidden");
+                ladeAdminDaten();
+            } else {
+                alert("Falsches Passwort");
+            }
+        };
+    });
+
+    /* -----------------------
+       ADMIN DATEN LADEN
+    ----------------------- */
+    function ladeAdminDaten() {
+
+        fetch(`${API_URL}/admin/termine`)
+            .then(res => res.json())
+            .then(data => {
+
+                const container = document.getElementById("adminContent");
+                container.innerHTML = "";
+
+                data.forEach(t => {
+
+                    const div = document.createElement("div");
+
+                    div.innerHTML = `
+                    <b>${t.vorname} ${t.nachname}</b><br>
+                    Verordnung: ${t.verordnung ? "JA" : "NEIN"}
+                `;
+
+                    if (t.verordnung && t.dateiname) {
+
+                        const btn = document.createElement("button");
+                        btn.innerText = "Verordnung öffnen";
+
+                        btn.onclick = () => {
+                            window.open(
+                                `${API_URL}/admin/verordnung/${t.dateiname}`,
+                                "_blank"
+                            );
+                        };
+
+                        div.appendChild(btn);
+                    }
+
+                    container.appendChild(div);
+                });
+            });
+    }
 </script>
 
 </body>

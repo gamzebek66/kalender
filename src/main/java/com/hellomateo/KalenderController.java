@@ -75,9 +75,4 @@ public class KalenderController {
         return "API läuft 🚀 - nutze /kalender/freietermine";
     }
 
-
-
-
-
-
 }

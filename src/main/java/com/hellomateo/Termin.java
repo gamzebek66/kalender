@@ -59,8 +59,4 @@ public class Termin {
         this.dateiname = dateiname;
     }
 
-
-
-
-
 }
