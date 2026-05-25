@@ -35,8 +35,6 @@ public class KalenderService {
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
 
-    private static List<Termin> termine =  //eine private Liste von Terminen
-            TerminStorage.ladeAlleTermine(); //Hier wird alle Temrine aus dem JSON in eine Liste von Terminen gespeichert
 
     public List<String> getFreieSlots(LocalDate datum) throws Exception {
 
@@ -247,12 +245,6 @@ public class KalenderService {
         TerminStorage.speichereTermine(termine);
 
          */
-
-        List<Termin> termine = TerminStorage.ladeAlleTermine();
-
-        termine.add(termin);
-
-        TerminStorage.speichereTermine(termine);
 
 
         event.setSummary(summary);
