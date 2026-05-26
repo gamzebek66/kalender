@@ -235,6 +235,52 @@ footer.footer img {
     height: 100%;
 }
 
+/* ---------------- ADMIN ---------------- */
+
+.adminPanel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    width: 90%;
+    max-width: 900px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    z-index: 9999;
+    padding: 20px;
+}
+
+.adminHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.adminHeader button {
+    width: auto;
+    padding: 8px 14px;
+}
+
+.adminTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.adminTable th,
+.adminTable td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.adminTable th {
+    background: #f2f2f2;
+}
+
 @media (max-width: 600px) {
 
     body {

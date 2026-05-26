@@ -64,9 +64,27 @@
         <img src="Logo.png" alt="Logo">
     </footer>
 
-    <!-- 🔥 ADMIN PANEL -->
-    <div id="adminPanel" class="hidden">
-        <div id="adminContent"></div>
+    <div id="adminPanel" class="hidden adminPanel">
+
+        <div class="adminHeader">
+            <h2>Admin Bereich</h2>
+            <button onclick="closeAdmin()">Schließen</button>
+        </div>
+
+        <table class="adminTable">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Datum</th>
+                <th>Uhrzeit</th>
+                <th>Verordnung</th>
+                <th>Datei</th>
+            </tr>
+            </thead>
+
+            <tbody id="adminContent"></tbody>
+        </table>
+
     </div>
 
 </div>
@@ -234,22 +252,25 @@
             .then(res => res.json())
             .then(data => {
 
-                const container = document.getElementById("adminContent");
-                container.innerHTML = "";
+                const tbody = document.getElementById("adminContent");
+                tbody.innerHTML = "";
 
                 data.forEach(t => {
 
-                    const div = document.createElement("div");
+                    const tr = document.createElement("tr");
 
-                    div.innerHTML = `
-                    <b>${t.vorname} ${t.nachname}</b><br>
-                    Verordnung: ${t.verordnung ? "JA" : "NEIN"}
+                    tr.innerHTML = `
+                    <td>${t.vorname} ${t.nachname}</td>
+                    <td>${t.datum}</td>
+                    <td>${t.uhrzeit}</td>
+                    <td>${t.verordnung ? "JA" : "NEIN"}</td>
+                    <td></td>
                 `;
 
                     if (t.verordnung && t.dateiname) {
 
                         const btn = document.createElement("button");
-                        btn.innerText = "Verordnung öffnen";
+                        btn.innerText = "Öffnen";
 
                         btn.onclick = () => {
                             window.open(
@@ -258,12 +279,19 @@
                             );
                         };
 
-                        div.appendChild(btn);
+                        tr.children[4].appendChild(btn);
+
+                    } else {
+                        tr.children[4].innerText = "-";
                     }
 
-                    container.appendChild(div);
+                    tbody.appendChild(tr);
                 });
             });
+    }
+
+    function closeAdmin() {
+        document.getElementById("adminPanel").classList.add("hidden");
     }
 </script>
 
