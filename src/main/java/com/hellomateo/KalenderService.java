@@ -292,7 +292,47 @@ public class KalenderService {
     // Neu
 
     public List<Termin> getAlleTermine() {
-        return new ArrayList<>();
+        try {
+            com.google.api.services.calendar.Calendar service = getCalendarService();
+
+            com.google.api.services.calendar.model.Events events =
+                    service.events()
+                            .list("b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com")
+                            .setSingleEvents(true)
+                            .execute();
+
+            List<Termin> result = new ArrayList<>();
+
+            for (com.google.api.services.calendar.model.Event e : events.getItems()) {
+
+                Termin t = new Termin();
+
+                String summary = e.getSummary();
+
+                if (summary != null && summary.contains("TERMIN - ")) {
+                    String name = summary.replace("TERMIN - ", "");
+                    String[] parts = name.split(" ");
+
+                    if (parts.length >= 2) {
+                        t.setVorname(parts[0]);
+                        t.setNachname(parts[1]);
+                    }
+                }
+
+                String desc = e.getDescription();
+                if (desc != null) {
+                    t.setVerordnung(desc.contains("Verordnung: JA"));
+                }
+
+                result.add(t);
+            }
+
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }
 
