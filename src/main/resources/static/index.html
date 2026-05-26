@@ -10,7 +10,9 @@
 
 <body>
 
-<button id="adminLoginBtn">Admin Login</button>
+<div class="topBar">
+    <button id="adminLoginBtn">Admin Login</button>
+</div>
 
 <div class="wrapper">
     <div class="content">
@@ -230,17 +232,20 @@
     ----------------------- */
     window.addEventListener("load", () => {
 
+        const panel = document.getElementById("adminPanel");
+
         document.getElementById("adminLoginBtn").onclick = () => {
 
             const pw = prompt("Admin Passwort:");
 
             if (pw === "1234") {
-                document.getElementById("adminPanel").classList.remove("hidden");
+                panel.classList.remove("hidden");
                 ladeAdminDaten();
             } else {
                 alert("Falsches Passwort");
             }
         };
+
     });
 
     /* -----------------------

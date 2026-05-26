@@ -235,7 +235,20 @@ footer.footer img {
     height: 100%;
 }
 
+
 /* ---------------- ADMIN ---------------- */
+
+.hidden {
+    display: none !important;
+}
+
+.topBar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+
+}
 
 .adminPanel {
     position: fixed;
@@ -243,9 +256,9 @@ footer.footer img {
     left: 50%;
     transform: translate(-50%, -50%);
     background: white;
-    width: 90%;
-    max-width: 900px;
-    max-height: 80vh;
+    width: 95%;
+    max-width: 1000px;
+    max-height: 85vh;
     overflow-y: auto;
     border-radius: 16px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.25);
