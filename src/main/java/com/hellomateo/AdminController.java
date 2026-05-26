@@ -11,44 +11,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-
 @RestController
 @RequestMapping("/admin")
 @CrossOrigin
-public class AdminController
-{
+public class AdminController {
+
     private final KalenderService kalenderService;
 
     public AdminController(KalenderService kalenderService) {
         this.kalenderService = kalenderService;
     }
 
-    // 🔥 FIX: keine TerminStorage mehr
     @GetMapping("/termine")
     public List<Termin> getAlleTermine() {
         return kalenderService.getAlleTermine();
     }
 
     @GetMapping("/verordnung/{dateiname}")
-    public ResponseEntity<Resource> getVerordnung(
-            @PathVariable String dateiname
-    ) throws Exception {
+    public ResponseEntity<Resource> getVerordnung(@PathVariable String dateiname) throws Exception {
 
         Path path = Paths.get("uploads").resolve(dateiname);
-
         Resource resource = new UrlResource(path.toUri());
 
         String contentType = Files.probeContentType(path);
-
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
+        if (contentType == null) contentType = "application/octet-stream";
 
         return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + dateiname + "\""
-                )
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + dateiname + "\"")
                 .header(HttpHeaders.CONTENT_TYPE, contentType)
                 .body(resource);
     }

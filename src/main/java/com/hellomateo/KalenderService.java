@@ -13,20 +13,20 @@ import com.google.api.services.calendar.model.EventDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.time.*;
 import java.util.*;
 
 @Service
 public class KalenderService {
+
+    private final TerminRepository terminRepository;
+
+    public KalenderService(TerminRepository terminRepository) {
+        this.terminRepository = terminRepository;
+    }
 
     private static final String APPLICATION_NAME = "HelloMateoSync";
     private static final LocalTime START = LocalTime.of(9, 0);
@@ -38,10 +38,10 @@ public class KalenderService {
 
     private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
 
-
+    // -------------------------
+    // FREIE TERMINE (UNVERÄNDERT)
+    // -------------------------
     public List<String> getFreieSlots(LocalDate datum) throws Exception {
-
-        System.out.println("👉 getFreieSlots gestartet: " + datum);
 
         if (datum.getDayOfWeek() == DayOfWeek.SUNDAY) {
             return List.of();
@@ -83,9 +83,7 @@ public class KalenderService {
             for (Event event : existingEvents) {
 
                 if (!"confirmed".equals(event.getStatus()) &&
-                        !"tentative".equals(event.getStatus())) {
-                    continue;
-                }
+                        !"tentative".equals(event.getStatus())) continue;
 
                 if (event.getStart() == null || event.getEnd() == null) continue;
 
@@ -116,6 +114,9 @@ public class KalenderService {
         return freieSlots;
     }
 
+    // -------------------------
+    // TERMIN BUCHEN + MONGO SPEICHERN
+    // -------------------------
     public String terminBuchen(
             String datum,
             String uhrzeit,
@@ -134,16 +135,11 @@ public class KalenderService {
 
         ZonedDateTime start = ZonedDateTime.of(date, time, ZONE);
 
-        int duration = 60;
-        String dateiname = null;
-
-        if ("Einlagen".equalsIgnoreCase(anliegen)) {
-            duration = 30;
-        }
+        int duration = "Einlagen".equalsIgnoreCase(anliegen) ? 30 : 60;
 
         ZonedDateTime end = start.plusMinutes(duration);
 
-        // Prüfen ob frei
+        // Google Calendar check
         Events events = service.events()
                 .list(CALENDAR_ID)
                 .setTimeMin(new DateTime(start.toInstant().toEpochMilli()))
@@ -151,108 +147,40 @@ public class KalenderService {
                 .setSingleEvents(true)
                 .execute();
 
-        for (Event e : events.getItems()) {
-
-            if (!"confirmed".equals(e.getStatus()) &&
-                    !"tentative".equals(e.getStatus())) {
-                continue;
-            }
-
-            if (e.getStart() == null || e.getEnd() == null) continue;
-
-            DateTime evStart = e.getStart().getDateTime();
-            DateTime evEnd = e.getEnd().getDateTime();
-
-            if (evStart == null || evEnd == null) continue;
-
-            ZonedDateTime es = ZonedDateTime.ofInstant(
-                    Instant.ofEpochMilli(evStart.getValue()), ZONE);
-
-            ZonedDateTime ee = ZonedDateTime.ofInstant(
-                    Instant.ofEpochMilli(evEnd.getValue()), ZONE);
-
-            if (start.isBefore(ee) && end.isAfter(es)) {
-                return "Termin ist leider schon vergeben!";
-            }
+        if (!events.getItems().isEmpty()) {
+            return "Termin ist leider schon vergeben!";
         }
 
-        Event event = new Event();
+        String dateiname = null;
 
-        String summary = "TERMIN - " + vorname + " " + nachname;
-
-        String descriptionText =
-                "Name: " + vorname + " " + nachname + "\n" +
-                        "Telefon: " + telefon + "\n" +
-                        "Anliegen: " + anliegen + "\n";
-
-        if (beschreibung != null && !beschreibung.isBlank()) {
-            descriptionText += "Beschreibung: " + beschreibung + "\n";
-        }
-
-
-        //neuer Codeteil JSON überarbeitung
-
-        
-
-
+        // ---------------- FILE UPLOAD ----------------
         if (verordnung != null && !verordnung.isEmpty()) {
 
-            dateiname =
-                    System.currentTimeMillis() + "_" +
-                            verordnung.getOriginalFilename();
+            dateiname = System.currentTimeMillis() + "_" + verordnung.getOriginalFilename();
 
             Path uploadPfad = Paths.get("uploads");
-
             if (!Files.exists(uploadPfad)) {
                 Files.createDirectories(uploadPfad);
             }
 
-            Path dateiPfad = uploadPfad.resolve(dateiname);
-
             Files.copy(
                     verordnung.getInputStream(),
-                    dateiPfad,
+                    uploadPfad.resolve(dateiname),
                     StandardCopyOption.REPLACE_EXISTING
             );
-
-            System.out.println("Datei gespeichert: " + dateiPfad);
-
-            descriptionText += "Verordnung: JA\n";
-            descriptionText += "Datei: " + dateiname + "\n";
-
-        } else {
-
-            descriptionText += "Verordnung: NEIN\n";
         }
 
+        // ---------------- GOOGLE CALENDAR EVENT ----------------
+        Event event = new Event();
 
+        event.setSummary("TERMIN - " + vorname + " " + nachname);
 
-        Termin termin = new Termin();
-
-        termin.setVorname(vorname);
-        termin.setNachname(nachname);
-        termin.setDatum(datum);
-        termin.setUhrzeit(uhrzeit);
-
-        boolean hatVerordnung =
-                verordnung != null && !verordnung.isEmpty();
-
-        termin.setVerordnung(hatVerordnung);
-
-        if (hatVerordnung) {
-            termin.setDateiname(dateiname);
-        }
-
-        /*
-        termine.add(termin);
-        TerminStorage.speichereTermine(termine);
-
-         */
-
-
-        event.setSummary(summary);
-        event.setDescription(descriptionText);
-        event.setStatus("tentative");
+        event.setDescription(
+                "Name: " + vorname + " " + nachname + "\n" +
+                        "Telefon: " + telefon + "\n" +
+                        "Anliegen: " + anliegen + "\n" +
+                        "Verordnung: " + (dateiname != null ? "JA" : "NEIN")
+        );
 
         event.setStart(new EventDateTime()
                 .setDateTime(new DateTime(start.toInstant().toEpochMilli())));
@@ -262,17 +190,37 @@ public class KalenderService {
 
         service.events().insert(CALENDAR_ID, event).execute();
 
+        // ---------------- MONGO SPEICHERN ----------------
+        Termin termin = new Termin();
+        termin.setVorname(vorname);
+        termin.setNachname(nachname);
+        termin.setDatum(datum);
+        termin.setUhrzeit(uhrzeit);
+        termin.setVerordnung(dateiname != null);
+        termin.setDateiname(dateiname);
+
+        terminRepository.save(termin);
+
         return "Der Termin wurde erfolgreich gebucht!";
     }
 
+    // -------------------------
+    // ADMIN DATEN AUS MONGO
+    // -------------------------
+    public List<Termin> getAlleTermine() {
+        return terminRepository.findAll();
+    }
+
+    // -------------------------
+    // GOOGLE AUTH
+    // -------------------------
     private Calendar getCalendarService() throws Exception {
 
         String credentials = System.getenv("GOOGLE_CREDENTIALS");
 
         if (credentials == null || credentials.isBlank()) {
-            throw new RuntimeException("GOOGLE_CREDENTIALS ist NICHT gesetzt!");
+            throw new RuntimeException("GOOGLE_CREDENTIALS fehlt!");
         }
-
 
         credentials = credentials.replace("\\n", "\n");
 
@@ -288,51 +236,4 @@ public class KalenderService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
-
-    // Neu
-
-    public List<Termin> getAlleTermine() {
-        try {
-            com.google.api.services.calendar.Calendar service = getCalendarService();
-
-            com.google.api.services.calendar.model.Events events =
-                    service.events()
-                            .list("b79dd58cedb1c9b72763f233cd389820552341762edb03a0b87249bd1c2bcc2b@group.calendar.google.com")
-                            .setSingleEvents(true)
-                            .execute();
-
-            List<Termin> result = new ArrayList<>();
-
-            for (com.google.api.services.calendar.model.Event e : events.getItems()) {
-
-                Termin t = new Termin();
-
-                String summary = e.getSummary();
-
-                if (summary != null && summary.contains("TERMIN - ")) {
-                    String name = summary.replace("TERMIN - ", "");
-                    String[] parts = name.split(" ");
-
-                    if (parts.length >= 2) {
-                        t.setVorname(parts[0]);
-                        t.setNachname(parts[1]);
-                    }
-                }
-
-                String desc = e.getDescription();
-                if (desc != null) {
-                    t.setVerordnung(desc.contains("Verordnung: JA"));
-                }
-
-                result.add(t);
-            }
-
-            return result;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
 }
-
