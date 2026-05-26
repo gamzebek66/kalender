@@ -1,3 +1,6 @@
+.hidden {
+    display: none !important;
+}
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f6f9;
