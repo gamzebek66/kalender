@@ -7,10 +7,10 @@ body {
     margin: 0;
     padding: 0;
     color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 h1, h2 {
@@ -28,6 +28,8 @@ h1, h2 {
     max-width: 500px;
     padding: 20px;
     box-sizing: border-box;
+
+    margin: 0 auto;
 }
 
 
@@ -249,7 +251,12 @@ footer.footer img {
     width: 100%;
     display: flex;
     justify-content: flex-end;
-    padding: 10px ;
+    align-items: center;
+    padding: 10px 20px;
+    position: sticky;   /* bleibt oben */
+    top: 0;
+                  /* wichtig damit es nicht durchsichtig ist */
+    z-index: 1000;
 
 }
 
@@ -258,15 +265,18 @@ footer.footer img {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+
     background: white;
-    width: 95%;
-    max-width: 1000px;
+    width: 90%;
+    max-width: 800px;
     max-height: 85vh;
+
     overflow-y: auto;
     border-radius: 16px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.25);
     z-index: 9999;
     padding: 20px;
+
 }
 
 .adminHeader {
@@ -274,11 +284,13 @@ footer.footer img {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+
 }
 
 .adminHeader button {
     width: auto;
-    padding: 8px 14px;
+
+
 }
 
 .adminTable {
@@ -295,6 +307,17 @@ footer.footer img {
 
 .adminTable th {
     background: #f2f2f2;
+}
+
+#adminLoginBtn {
+
+    width: auto;
+    font-size: 12px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    margin-right: 15px;
+    cursor: pointer;
+
 }
 
 @media (max-width: 600px) {
