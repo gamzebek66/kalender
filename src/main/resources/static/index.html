@@ -237,16 +237,20 @@
 
         const panel = document.getElementById("adminPanel");
 
-        document.getElementById("adminLoginBtn").onclick = () => {
+        document.getElementById("adminLoginBtn").onclick = async () => {
 
-            const pw = prompt("Admin Passwort:");
+            const username = prompt("Username:");
+            const password = prompt("Passwort:");
 
-            if (pw === "1234") {
-                panel.classList.remove("hidden");
-                ladeAdminDaten();
-            } else {
-                alert("Falsches Passwort");
-            }
+            const formData = new URLSearchParams();
+            formData.append("username", username);
+            formData.append("password", password);
+
+            const res = await fetch(`${API_URL}/login`, {
+                method: "POST",
+                body: formData,
+                credentials: "include"
+            });
         };
 
     });
