@@ -251,6 +251,16 @@
                 body: formData,
                 credentials: "include"
             });
+
+            if (res.ok) {
+                alert("Login erfolgreich!");
+
+                document.getElementById("adminPanel").classList.remove("hidden");
+                ladeAdminDaten();
+
+            } else {
+                alert("Login fehlgeschlagen!");
+            }
         };
 
     });
