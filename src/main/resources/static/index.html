@@ -69,6 +69,26 @@
 
     </footer>
 
+    <div id="loginPanel" class="hidden">
+
+        <h2>Admin Login</h2>
+
+        <input
+                type="text"
+                id="username"
+                placeholder="Benutzername">
+
+        <input
+                type="password"
+                id="password"
+                placeholder="Passwort">
+
+        <button id="loginBtn">
+            Anmelden
+        </button>
+
+    </div>
+
     <div id="adminPanel" class="hidden adminPanel">
 
         <div class="adminHeader">
@@ -237,30 +257,8 @@
 
         const panel = document.getElementById("adminPanel");
 
-        document.getElementById("adminLoginBtn").onclick = async () => {
-
-            const username = prompt("Username:");
-            const password = prompt("Passwort:");
-
-            const formData = new URLSearchParams();
-            formData.append("username", username);
-            formData.append("password", password);
-
-            const res = await fetch(`${API_URL}/login`, {
-                method: "POST",
-                body: formData,
-                credentials: "include"
-            });
-
-            if (res.ok) {
-                alert("Login erfolgreich!");
-
-                document.getElementById("adminPanel").classList.remove("hidden");
-                ladeAdminDaten();
-
-            } else {
-                alert("Login fehlgeschlagen!");
-            }
+        document.getElementById("adminLoginBtn").onclick = () => {
+            document.getElementById("loginPanel").classList.remove("hidden");
         };
 
     });
