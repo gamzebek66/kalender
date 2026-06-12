@@ -272,6 +272,30 @@
 
             console.log(username);
             console.log(password);
+
+            const formData = new URLSearchParams();
+
+            formData.append("username", username);
+            formData.append("password", password);
+
+            fetch(`${API_URL}/login`, {
+                method: "POST",
+                body: formData,
+                credentials: "include"
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert("Login erfolgreich!");
+
+                        document.getElementById("loginPanel").classList.add("hidden");
+                        document.getElementById("adminPanel").classList.remove("hidden");
+
+                        ladeAdminDaten();
+                    } else {
+                        alert("Login fehlgeschlagen!");
+                    }
+                });
+
         };
 
 
